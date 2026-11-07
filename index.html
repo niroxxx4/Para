@@ -298,6 +298,8 @@ body.searching .rc.open .rc-desc{display:block}
 .fg .grp{flex:none;width:58px;border-left:0;padding:9px 0 0;font-size:10.5px}
 .fg-chips{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
 .ftoggle{display:none}
+/* Ręczny wybór motywu: data-theme na <html> wygrywa z ustawieniem telefonu (prefers-color-scheme). */
+:root[data-theme="light"]{color-scheme:light}
 .fok{display:none;align-self:stretch;text-align:center;background:var(--ink);color:var(--paper);border-color:var(--ink)}
 /* Chipy sezonów: obrys w kolorze sezonu, po zaznaczeniu wypełnienie. */
 .chip-s.s-wiosna{color:var(--wiosna);border-color:var(--wiosna)}.chip-s.s-lato{color:var(--lato);border-color:var(--lato)}
@@ -311,7 +313,7 @@ body.searching .rc.open .rc-desc{display:block}
 /* Telefon: panel filtrów zwinięty za przyciskiem, żeby przyklejony pasek nie zasłaniał listy; otwarty może się przewijać. */
 @media (max-width:640px){
   .ftoggle{display:inline-block}
-  .fok{display:block}
+  .fok{display:block;position:sticky;bottom:0;box-shadow:0 -8px 8px -4px var(--paper)}
   .fgroups{display:none}
   .fgroups.open{display:flex}
   .bar{max-height:70vh;overflow-y:auto}
@@ -367,6 +369,7 @@ body.searching .rc.open .rc-desc{display:block}
    <button class="chip ftoggle" id="ftoggle" type="button" aria-expanded="false" aria-controls="fgroups">Filtry <b id="fbadge" hidden></b></button>
    <button class="chip clear" id="clear" type="button" hidden>× wyczyść</button>
    <span class="count" id="count" aria-live="polite">116 przepisów</span>
+   <button class="chip" id="theme" type="button" title="Przełącz wygląd: automatycznie / jasny / ciemny">Motyw: auto</button>
    <div class="fgroups" id="fgroups">
    <div class="fg"><span class="grp">Sezon</span><div class="fg-chips">
    <button class="chip chip-s s-wiosna" data-s="wiosna" aria-pressed="false">wiosna</button>
@@ -4647,6 +4650,13 @@ body.searching .rc.open .rc-desc{display:block}
   const texts=cards.map(c=>norm(c.dataset.text));
   const on=b=>b.getAttribute('aria-pressed')==='true';
   const fg=document.getElementById('fgroups'), ft=document.getElementById('ftoggle'), fbadge=document.getElementById('fbadge');
+  // Motyw: auto (wg telefonu) → jasny → ciemny. Wybór zapamiętany w localStorage tylko jako wygoda (try/catch: bywa zablokowany).
+  const themeBtn=document.getElementById('theme'), MODES=['auto','light','dark'], LABEL={auto:'auto',light:'jasny',dark:'ciemny'};
+  let mode='auto';
+  try{mode=MODES.includes(localStorage.getItem('para-motyw'))?localStorage.getItem('para-motyw'):'auto'}catch(e){}
+  const setMode=m=>{mode=m;const r=document.documentElement;if(m==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',m);themeBtn.textContent='Motyw: '+LABEL[m];try{localStorage.setItem('para-motyw',m)}catch(e){}};
+  setMode(mode);
+  themeBtn.addEventListener('click',()=>setMode(MODES[(MODES.indexOf(mode)+1)%3]));
   const DIET_IDS=['diet','dietz'];
   const sBtns=[...document.querySelectorAll('[data-s]')];
   const mBtns=[...document.querySelectorAll('[data-m]')], mamIn=document.getElementById('mam'), mallBtn=document.getElementById('mamall');
