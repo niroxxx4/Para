@@ -298,6 +298,7 @@ body.searching .rc.open .rc-desc{display:block}
 .fg .grp{flex:none;width:58px;border-left:0;padding:9px 0 0;font-size:10.5px}
 .fg-chips{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
 .ftoggle{display:none}
+.fok{display:none;align-self:stretch;text-align:center;background:var(--ink);color:var(--paper);border-color:var(--ink)}
 /* Chipy sezonów: obrys w kolorze sezonu, po zaznaczeniu wypełnienie. */
 .chip-s.s-wiosna{color:var(--wiosna);border-color:var(--wiosna)}.chip-s.s-lato{color:var(--lato);border-color:var(--lato)}
 .chip-s.s-jesien{color:var(--jesien);border-color:var(--jesien)}.chip-s.s-zima{color:var(--zima);border-color:var(--zima)}
@@ -310,6 +311,7 @@ body.searching .rc.open .rc-desc{display:block}
 /* Telefon: panel filtrów zwinięty za przyciskiem, żeby przyklejony pasek nie zasłaniał listy; otwarty może się przewijać. */
 @media (max-width:640px){
   .ftoggle{display:inline-block}
+  .fok{display:block}
   .fgroups{display:none}
   .fgroups.open{display:flex}
   .bar{max-height:70vh;overflow-y:auto}
@@ -411,6 +413,7 @@ body.searching .rc.open .rc-desc{display:block}
    <button class="chip" data-x="gorczyca" aria-pressed="false">gorczycy</button>
    <button class="chip" data-x="seler" aria-pressed="false">selera</button>
    </div></div>
+   <button class="chip fok" id="fok" type="button">OK – pokaż wyniki</button>
    </div>
   </div>
  </div>
@@ -4657,8 +4660,7 @@ body.searching .rc.open .rc-desc{display:block}
     const raw=[...mBtns.filter(on).map(b=>b.dataset.m),...mamIn.value.split(/[\s,;]+/)];
     return [...new Set(raw.map(w=>norm(w.trim())).filter(w=>w.length>=3))].map(w=>({w,st:stem(w)}));
   };
-  // quiet: do tego czasu ignorujemy zdarzenia scroll – to nasze własne przewinięcie (wejście i wyjście z trybu wyników), nie ruch użytkownika.
-  let saved=0, timer=0, quiet=0;
+  let saved=0, timer=0;
   function apply(){
     // Filtry wykluczające (xs): karta znika, gdy jej data-alg zawiera wybrany alergen.
     const term=norm(q.value.trim()), ds=dBtns.filter(on).map(b=>b.dataset.d), xs=xBtns.filter(on).map(b=>b.dataset.x);
@@ -4668,8 +4670,8 @@ body.searching .rc.open .rc-desc{display:block}
     const pressed=fBtns.filter(on), dietFs=pressed.filter(b=>DIET_IDS.includes(b.id)).map(b=>flags[b.id]), fs=pressed.filter(b=>!DIET_IDS.includes(b.id)).map(b=>flags[b.id]);
     const mam=mamTokens(), mall=on(mallBtn);
     const active=!!term||ds.length>0||fs.length>0||dietFs.length>0||xs.length>0||mam.length>0||ss.length>0;
-    if(active&&!body.classList.contains('searching')){saved=scrollY;body.classList.add('searching');scrollTo(0,0);quiet=Date.now()+700}
-    if(!active&&body.classList.contains('searching')){body.classList.remove('searching');cards.forEach(c=>c.classList.remove('open'));quiet=Date.now()+700;requestAnimationFrame(()=>scrollTo(0,saved))}
+    if(active&&!body.classList.contains('searching')){saved=scrollY;body.classList.add('searching');scrollTo(0,0)}
+    if(!active&&body.classList.contains('searching')){body.classList.remove('searching');cards.forEach(c=>c.classList.remove('open'));requestAnimationFrame(()=>scrollTo(0,saved))}
     let n=0;
     const score=new Map();
     cards.forEach((c,i)=>{
@@ -4713,18 +4715,10 @@ body.searching .rc.open .rc-desc{display:block}
   clr.addEventListener('click',clearAll);
   // Panel filtrów (telefon) zamyka się sam, gdy użytkownik przewija stronę albo dotyka poza paskiem – zasłaniałby listę wyników.
   // Wyjątek: gdy pole tekstowe ma fokus, bo klawiatura ekranowa potrafi przewinąć stronę i zamknęłaby panel w trakcie pisania.
-  // Dotyk lub kółko myszy zaczęte NA pasku (np. przesuwanie samego panelu) nie liczą się jako przewijanie strony:
-  // przeglądarka przekazuje taki ruch stronie, więc bez tego panel zamykałby się przy próbie jego przesunięcia.
-  let barTouch=false, barTimer=0;
-  const holdBar=ms=>{barTouch=true;clearTimeout(barTimer);barTimer=setTimeout(()=>{barTouch=false},ms)};
-  const onBar=e=>e.target.closest&&e.target.closest('.bar');
-  document.addEventListener('touchstart',e=>{if(onBar(e))holdBar(1e5)},{passive:true});
-  ['touchend','touchcancel'].forEach(t=>document.addEventListener(t,()=>holdBar(500),{passive:true}));
-  document.addEventListener('wheel',e=>{if(onBar(e))holdBar(500)},{passive:true});
+  // Panel filtrów (telefon) zamyka się wyłącznie ręcznie: przyciskiem „Filtry” albo „OK” na dole panelu.
+  // Samoczynne zamykanie (scroll, dotyk poza paskiem) odrzucone: przeszkadzało przy przesuwaniu samego panelu.
   const closePanel=()=>{fg.classList.remove('open');ft.setAttribute('aria-expanded','false')};
-  addEventListener('scroll',()=>{if(Date.now()>quiet&&!barTouch&&fg.classList.contains('open')&&document.activeElement.tagName!=='INPUT')closePanel()},{passive:true});
-  document.addEventListener('pointerdown',e=>{if(!onBar(e))closePanel()});
-  [q,mamIn].forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter')closePanel()}));
+  document.getElementById('fok').addEventListener('click',closePanel);
   ft.addEventListener('click',()=>{const o=fg.classList.toggle('open');ft.setAttribute('aria-expanded',String(o))});
   document.querySelectorAll('.nav a, .spine a').forEach(a=>a.addEventListener('click',()=>{if(body.classList.contains('searching'))clearAll()}));
   cards.forEach(c=>{const b=c.querySelector('.rc-toggle');b.addEventListener('click',()=>{const o=c.classList.toggle('open');b.setAttribute('aria-expanded',String(o));b.textContent=o?'Zwiń':'Pokaż przepis'})});
