@@ -4698,9 +4698,17 @@ body.searching .rc.open .rc-desc{display:block}
   clr.addEventListener('click',clearAll);
   // Panel filtrów (telefon) zamyka się sam, gdy użytkownik przewija stronę albo dotyka poza paskiem – zasłaniałby listę wyników.
   // Wyjątek: gdy pole tekstowe ma fokus, bo klawiatura ekranowa potrafi przewinąć stronę i zamknęłaby panel w trakcie pisania.
+  // Dotyk lub kółko myszy zaczęte NA pasku (np. przesuwanie samego panelu) nie liczą się jako przewijanie strony:
+  // przeglądarka przekazuje taki ruch stronie, więc bez tego panel zamykałby się przy próbie jego przesunięcia.
+  let barTouch=false, barTimer=0;
+  const holdBar=ms=>{barTouch=true;clearTimeout(barTimer);barTimer=setTimeout(()=>{barTouch=false},ms)};
+  const onBar=e=>e.target.closest&&e.target.closest('.bar');
+  document.addEventListener('touchstart',e=>{if(onBar(e))holdBar(1e5)},{passive:true});
+  ['touchend','touchcancel'].forEach(t=>document.addEventListener(t,()=>holdBar(500),{passive:true}));
+  document.addEventListener('wheel',e=>{if(onBar(e))holdBar(500)},{passive:true});
   const closePanel=()=>{fg.classList.remove('open');ft.setAttribute('aria-expanded','false')};
-  addEventListener('scroll',()=>{if(Date.now()>quiet&&fg.classList.contains('open')&&document.activeElement.tagName!=='INPUT')closePanel()},{passive:true});
-  document.addEventListener('pointerdown',e=>{if(!e.target.closest('.bar'))closePanel()});
+  addEventListener('scroll',()=>{if(Date.now()>quiet&&!barTouch&&fg.classList.contains('open')&&document.activeElement.tagName!=='INPUT')closePanel()},{passive:true});
+  document.addEventListener('pointerdown',e=>{if(!onBar(e))closePanel()});
   [q,mamIn].forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter')closePanel()}));
   ft.addEventListener('click',()=>{const o=fg.classList.toggle('open');ft.setAttribute('aria-expanded',String(o))});
   document.querySelectorAll('.nav a, .spine a').forEach(a=>a.addEventListener('click',()=>{if(body.classList.contains('searching'))clearAll()}));
