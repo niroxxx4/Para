@@ -298,6 +298,12 @@ body.searching .rc.open .rc-desc{display:block}
 .fg .grp{flex:none;width:58px;border-left:0;padding:9px 0 0;font-size:10.5px}
 .fg-chips{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
 .ftoggle{display:none}
+/* Chipy sezonów: obrys w kolorze sezonu, po zaznaczeniu wypełnienie. */
+.chip-s.s-wiosna{color:var(--wiosna);border-color:var(--wiosna)}.chip-s.s-lato{color:var(--lato);border-color:var(--lato)}
+.chip-s.s-jesien{color:var(--jesien);border-color:var(--jesien)}.chip-s.s-zima{color:var(--zima);border-color:var(--zima)}
+.chip-s[aria-pressed="true"]{color:var(--paper)}
+.chip-s.s-wiosna[aria-pressed="true"]{background:var(--wiosna)}.chip-s.s-lato[aria-pressed="true"]{background:var(--lato)}
+.chip-s.s-jesien[aria-pressed="true"]{background:var(--jesien)}.chip-s.s-zima[aria-pressed="true"]{background:var(--zima)}
 .rc-match{margin:6px 0 0;font:500 12.5px var(--f-mono);color:var(--acc)}
 .fg-chips input{margin-bottom:2px}
 .ftoggle b{display:inline-block;min-width:16px;margin-left:4px;padding:2px 4px;border-radius:999px;background:var(--lato);color:#fff;font:600 11px/1 var(--f-mono);text-align:center}
@@ -360,6 +366,12 @@ body.searching .rc.open .rc-desc{display:block}
    <button class="chip clear" id="clear" type="button" hidden>× wyczyść</button>
    <span class="count" id="count" aria-live="polite">116 przepisów</span>
    <div class="fgroups" id="fgroups">
+   <div class="fg"><span class="grp">Sezon</span><div class="fg-chips">
+   <button class="chip chip-s s-wiosna" data-s="wiosna" aria-pressed="false">wiosna</button>
+   <button class="chip chip-s s-lato" data-s="lato" aria-pressed="false">lato</button>
+   <button class="chip chip-s s-jesien" data-s="jesien" aria-pressed="false">jesień</button>
+   <button class="chip chip-s s-zima" data-s="zima" aria-pressed="false">zima</button>
+   </div></div>
    <div class="fg"><span class="grp">Przepis</span><div class="fg-chips">
    <button class="chip" data-d="1" aria-pressed="false">łatwe</button>
    <button class="chip" data-d="2" aria-pressed="false">średnie</button>
@@ -4611,7 +4623,7 @@ body.searching .rc.open .rc-desc{display:block}
  <footer class="colophon">
   <p><b>Para przez cały rok</b> · 116 przepisów · wydanie 1, listopad 2026.</p>
   <p>Czasy parowania są orientacyjne – każdy parowar grzeje trochę inaczej. Przy pierwszym przepisie sprawdzaj wcześniej i zapisz, jak zachowuje się twój sprzęt.</p>
-  <p>Książka przygotowana z pomocą Claude – test składu i spójności dokumentu.</p>
+  <p>Książka przygotowana z pomocą Claude (Anthropic) – test składu i spójności dokumentu. Treść i kod powstały przy użyciu AI, zredagowane i sprawdzone przez autora. Wartości odżywcze są orientacyjne, a oznaczenia diety i alergenów nie zastępują porady lekarza ani dietetyka.</p>
  </footer>
 </main>
 
@@ -4633,6 +4645,7 @@ body.searching .rc.open .rc-desc{display:block}
   const on=b=>b.getAttribute('aria-pressed')==='true';
   const fg=document.getElementById('fgroups'), ft=document.getElementById('ftoggle'), fbadge=document.getElementById('fbadge');
   const DIET_IDS=['diet','dietz'];
+  const sBtns=[...document.querySelectorAll('[data-s]')];
   const mBtns=[...document.querySelectorAll('[data-m]')], mamIn=document.getElementById('mam'), mallBtn=document.getElementById('mamall');
   // „Mam w lodówce”: składniki z chipów i z pola. Dopasowanie po początku słowa i krótkim rdzeniu (marchewka → marche, cukinii → cukin),
   // bo polskie końcówki zmieniają się w przepisach (cukinia / cukinii / cukinie). Bez diakrytyków, jak w wyszukiwarce.
@@ -4649,10 +4662,12 @@ body.searching .rc.open .rc-desc{display:block}
   function apply(){
     // Filtry wykluczające (xs): karta znika, gdy jej data-alg zawiera wybrany alergen.
     const term=norm(q.value.trim()), ds=dBtns.filter(on).map(b=>b.dataset.d), xs=xBtns.filter(on).map(b=>b.dataset.x);
+    // Sezon: grupa „lub” (wiosna albo lato…); pusta = wszystkie sezony.
+    const ss=sBtns.filter(on).map(b=>b.dataset.s);
     // Filtry diety to grupa „lub” (T albo Z); pozostałe filtry „na tak” są łączone przez „i”.
     const pressed=fBtns.filter(on), dietFs=pressed.filter(b=>DIET_IDS.includes(b.id)).map(b=>flags[b.id]), fs=pressed.filter(b=>!DIET_IDS.includes(b.id)).map(b=>flags[b.id]);
     const mam=mamTokens(), mall=on(mallBtn);
-    const active=!!term||ds.length>0||fs.length>0||dietFs.length>0||xs.length>0||mam.length>0;
+    const active=!!term||ds.length>0||fs.length>0||dietFs.length>0||xs.length>0||mam.length>0||ss.length>0;
     if(active&&!body.classList.contains('searching')){saved=scrollY;body.classList.add('searching');scrollTo(0,0);quiet=Date.now()+700}
     if(!active&&body.classList.contains('searching')){body.classList.remove('searching');cards.forEach(c=>c.classList.remove('open'));quiet=Date.now()+700;requestAnimationFrame(()=>scrollTo(0,saved))}
     let n=0;
@@ -4662,7 +4677,7 @@ body.searching .rc.open .rc-desc{display:block}
       const hit=mam.filter(t=>ings[i].includes(' '+t.st));
       score.set(c,hit.length);
       const mamOk=!mam.length||(mall?hit.length===mam.length:hit.length>0);
-      const ok=mamOk&&(!term||texts[i].includes(term))&&(!ds.length||ds.includes(c.dataset.diff))&&fs.every(f=>f(c))&&(!dietFs.length||dietFs.some(f=>f(c)))&&xs.every(x=>!c.dataset.alg.split(' ').includes(x));
+      const ok=mamOk&&(!ss.length||ss.includes(c.dataset.season))&&(!term||texts[i].includes(term))&&(!ds.length||ds.includes(c.dataset.diff))&&fs.every(f=>f(c))&&(!dietFs.length||dietFs.some(f=>f(c)))&&xs.every(x=>!c.dataset.alg.split(' ').includes(x));
       c.hidden=!ok; if(ok)n++;
       let m=c.querySelector('.rc-match');
       if(mam.length&&ok){
@@ -4685,12 +4700,12 @@ body.searching .rc.open .rc-desc{display:block}
       s.querySelector('.empty').hidden=vis>0;
     });
     // Plakietka na przycisku „Filtry” (telefon): ile filtrów włączono, także gdy panel jest zwinięty.
-    const nf=ds.length+fs.length+dietFs.length+xs.length+mam.length+(mall&&mam.length?1:0); fbadge.textContent=nf; fbadge.hidden=nf===0;
+    const nf=ss.length+ds.length+fs.length+dietFs.length+xs.length+mam.length+(mall&&mam.length?1:0); fbadge.textContent=nf; fbadge.hidden=nf===0;
     none.hidden=!(active&&n===0); clr.hidden=!active;
     count.textContent=active?'wyniki: '+n:n+' przepisów';
   }
-  function clearAll(){q.value='';mamIn.value='';[...dBtns,...fBtns,...xBtns,...mBtns,mallBtn].forEach(b=>b.setAttribute('aria-pressed','false'));apply()}
-  [...dBtns,...fBtns,...xBtns,...mBtns,mallBtn].forEach(b=>b.addEventListener('click',()=>{b.setAttribute('aria-pressed',String(!on(b)));apply()}));
+  function clearAll(){q.value='';mamIn.value='';[...dBtns,...fBtns,...xBtns,...mBtns,...sBtns,mallBtn].forEach(b=>b.setAttribute('aria-pressed','false'));apply()}
+  [...dBtns,...fBtns,...xBtns,...mBtns,...sBtns,mallBtn].forEach(b=>b.addEventListener('click',()=>{b.setAttribute('aria-pressed',String(!on(b)));apply()}));
   mamIn.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(apply,180)});
   mamIn.addEventListener('keydown',e=>{if(e.key==='Enter'){mamIn.blur()}});
   q.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(apply,180)});
