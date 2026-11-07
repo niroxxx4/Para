@@ -72,8 +72,6 @@ a{color:inherit}
 .chip{font:500 13px/1 var(--f-mono);padding:9px 11px;border-radius:999px;border:1px solid var(--line);background:var(--sheet);color:var(--muted);cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .chip:focus-visible,.nav a:focus-visible,input:focus-visible{outline:2px solid var(--lato);outline-offset:2px}
-.chips-row{display:flex;gap:8px;align-items:center;flex:1 1 100%;min-width:0;overflow-x:auto;scrollbar-width:none}
-.chips-row .chip{flex:none}
 .count{flex:none;font:500 13px var(--f-mono);color:var(--muted);margin-left:auto;white-space:nowrap;padding-left:6px}
 .season,.chapter{scroll-margin-top:110px}
 
@@ -255,7 +253,7 @@ a{color:inherit}
   .tc-axis .tc-name{display:none}
   .fridge li{grid-template-columns:minmax(0,1fr)}
   .fridge span{display:none}
-  .filters input{flex:1 1 0}
+  .filters input{flex:1 1 100%}
   .count{margin-left:0}
   .rc,.season,.chapter{scroll-margin-top:150px}
   .bar .wrap{gap:6px;padding-block:8px}
@@ -294,6 +292,23 @@ body.searching .rc.open .rc-desc{display:block}
 }
 
 /* Tagi, alergeny, dieta */
+/* Filtry w liniach po grupach: Przepis / Dieta / Bez. Chipy zawijają się, nic nie przewija się w bok. */
+.fgroups{flex:1 1 100%;display:flex;flex-direction:column;gap:6px}
+.fg{display:flex;gap:8px;align-items:flex-start}
+.fg .grp{flex:none;width:58px;border-left:0;padding:9px 0 0;font-size:10.5px}
+.fg-chips{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.ftoggle{display:none}
+.rc-match{margin:6px 0 0;font:500 12.5px var(--f-mono);color:var(--acc)}
+.fg-chips input{margin-bottom:2px}
+.ftoggle b{display:inline-block;min-width:16px;margin-left:4px;padding:2px 4px;border-radius:999px;background:var(--lato);color:#fff;font:600 11px/1 var(--f-mono);text-align:center}
+/* Telefon: panel filtrów zwinięty za przyciskiem, żeby przyklejony pasek nie zasłaniał listy; otwarty może się przewijać. */
+@media (max-width:640px){
+  .ftoggle{display:inline-block}
+  .fgroups{display:none}
+  .fgroups.open{display:flex}
+  .bar{max-height:70vh;overflow-y:auto}
+  .fg .chip{padding:8px 10px;font-size:12.5px}
+}
 .grp{flex:none;font:500 10.5px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-left:8px;border-left:1px solid var(--line)}
 .rc-tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:12px}
 .tg{font:500 12px/1 var(--f-mono);padding:6px 9px;border-radius:999px;border:1px solid}
@@ -341,9 +356,11 @@ body.searching .rc.open .rc-desc{display:block}
   </nav>
   <div class="filters" role="group" aria-label="Filtry przepisów">
    <input id="q" type="search" placeholder="Składnik lub nazwa, np. cukinia, dorsz…" aria-label="Szukaj po składniku lub nazwie">
+   <button class="chip ftoggle" id="ftoggle" type="button" aria-expanded="false" aria-controls="fgroups">Filtry <b id="fbadge" hidden></b></button>
    <button class="chip clear" id="clear" type="button" hidden>× wyczyść</button>
    <span class="count" id="count" aria-live="polite">116 przepisów</span>
-   <div class="chips-row">
+   <div class="fgroups" id="fgroups">
+   <div class="fg"><span class="grp">Przepis</span><div class="fg-chips">
    <button class="chip" data-d="1" aria-pressed="false">łatwe</button>
    <button class="chip" data-d="2" aria-pressed="false">średnie</button>
    <button class="chip" data-d="3" aria-pressed="false">wymagające</button>
@@ -351,11 +368,29 @@ body.searching .rc.open .rc-desc{display:block}
    <button class="chip" id="top" aria-pressed="false">★★★★★</button>
    <button class="chip" id="lowcal" aria-pressed="false">≤ 400 kcal</button>
    <button class="chip" id="prot" aria-pressed="false">≥ 25 g białka</button>
-   <span class="grp">Dieta</span>
+   </div></div>
+   <div class="fg"><span class="grp">Dieta</span><div class="fg-chips">
    <button class="chip" id="diet" aria-pressed="false">łatwostrawne</button>
-   <button class="chip" id="dietz" aria-pressed="false">+ po zmianach</button>
+   <button class="chip" id="dietz" aria-pressed="false">po zmianach</button>
    <button class="chip" id="veg" aria-pressed="false">wegetariańskie</button>
-   <span class="grp">Bez</span>
+   </div></div>
+   <div class="fg"><span class="grp">Mam</span><div class="fg-chips">
+   <input id="mam" type="search" placeholder="wpisz, co masz: cukinia, ser, ryż…" aria-label="Składniki, które mam w lodówce" autocomplete="off">
+   <button class="chip" data-m="marchew" aria-pressed="false">marchew</button>
+   <button class="chip" data-m="ziemniak" aria-pressed="false">ziemniak</button>
+   <button class="chip" data-m="cukinia" aria-pressed="false">cukinia</button>
+   <button class="chip" data-m="brokuł" aria-pressed="false">brokuł</button>
+   <button class="chip" data-m="dynia" aria-pressed="false">dynia</button>
+   <button class="chip" data-m="burak" aria-pressed="false">burak</button>
+   <button class="chip" data-m="szpinak" aria-pressed="false">szpinak</button>
+   <button class="chip" data-m="pomidor" aria-pressed="false">pomidor</button>
+   <button class="chip" data-m="kalafior" aria-pressed="false">kalafior</button>
+   <button class="chip" data-m="kapusta" aria-pressed="false">kapusta</button>
+   <button class="chip" data-m="por" aria-pressed="false">por</button>
+   <button class="chip" data-m="jajka" aria-pressed="false">jajka</button>
+   <button class="chip" id="mamall" aria-pressed="false" title="Pokaż tylko przepisy ze wszystkimi wybranymi składnikami">wszystkie naraz</button>
+   </div></div>
+   <div class="fg"><span class="grp">Bez</span><div class="fg-chips">
    <button class="chip" data-x="gluten" aria-pressed="false">glutenu</button>
    <button class="chip" data-x="mleko" aria-pressed="false">mleka</button>
    <button class="chip" data-x="jaja" aria-pressed="false">jaj</button>
@@ -363,6 +398,7 @@ body.searching .rc.open .rc-desc{display:block}
    <button class="chip" data-x="orzechy" aria-pressed="false">orzechów</button>
    <button class="chip" data-x="gorczyca" aria-pressed="false">gorczycy</button>
    <button class="chip" data-x="seler" aria-pressed="false">selera</button>
+   </div></div>
    </div>
   </div>
  </div>
@@ -512,7 +548,7 @@ body.searching .rc.open .rc-desc{display:block}
     <div><h4>Jak jeść</h4><p>5–6 małych posiłków dziennie, ostatni 2–3 godziny przed snem, bez dosalania – zioła zamiast soli. Bulion domowy, bez kostek rosołowych.</p></div>
    </div>
    <div class="prose" style="margin-top:20px">
-    <p><b>Jak czytać oznaczenia.</b> „Łatwostrawne” – przepis spełnia zalecenia bez zmian, przy zasadach ogólnych: warzywa i owoce obieraj, nie dosalaj, jedz mniejsze porcje. „Łatwostrawne po zmianach” – wystarczy jedna lub dwie podmiany opisane na karcie przepisu w ramce „Wersja łatwostrawna”. Na końcu każdego sezonu są nowe przepisy pisane od razu pod tę dietę.</p>
+    <p><b>Jak czytać oznaczenia.</b> „Łatwostrawne” – przepis spełnia zalecenia bez zmian, przy zasadach ogólnych: warzywa i owoce obieraj, nie dosalaj, jedz mniejsze porcje. „Łatwostrawne po zmianach” – wystarczy jedna lub dwie podmiany opisane na karcie przepisu w ramce „Wersja łatwostrawna”. Na końcu każdego sezonu są nowe przepisy pisane od razu pod tę dietę. W filtrach można zaznaczyć oba tagi naraz: wynik to przepisy łatwostrawne lub łatwostrawne po zmianach.</p>
     <p class="callout">Oznaczenia to moja interpretacja ogólnych zaleceń, nie porada medyczna. Zakres i czas diety ustala lekarz lub dietetyk. Zalecenia są miejscami niejednoznaczne: gruszki są na liście zalecanych i przeciwwskazanych, truskawki raz „przecierać”, raz „przeciwwskazane”, a brokuł jest zalecany, choć należy do kapustnych. Przy takich produktach decyduje indywidualna tolerancja.</p>
     <p><b>Alergeny</b> oznaczam według 14 grup z rozporządzenia UE 1169/2011 na podstawie listy składników. Etykiety gotowych produktów – pieczywa, bulionu, wędlin, przypraw – sprawdzaj zawsze, bo mogą zawierać gluten, seler albo gorczycę. „Bez alergenów z listy UE” nie wyklucza śladów z produkcji. Za wegetariańskie uznaję przepisy bez mięsa i ryb (z jajkami i nabiałem), z bulionem warzywnym.</p>
    </div>
@@ -541,7 +577,7 @@ body.searching .rc.open .rc-desc{display:block}
   </div>
  </div>
  <div class="recipes">
-<article class="rc" id="p1" data-season="wiosna" data-diff="1" data-rate="5" data-time="17" data-kcal="260" data-prot="18" data-diet="Z" data-veg="1" data-alg="mleko jaja" data-text="szparagi z jajkiem i masłem koperkowym 1 pęczek zielonych szparagów 4 jajka 20 g masła 2 łyżki posiekanego koperku sok z ¼ cytryny sól, pieprz szparagi ↔ fasolka szparagowa (+5 min) albo brokuł w różyczkach">
+<article class="rc" id="p1" data-season="wiosna" data-diff="1" data-rate="5" data-time="17" data-kcal="260" data-prot="18" data-diet="Z" data-veg="1" data-alg="mleko jaja" data-ing="1 pęczek zielonych szparagów 4 jajka 20 g masła 2 łyżki posiekanego koperku sok z ¼ cytryny sól, pieprz" data-text="szparagi z jajkiem i masłem koperkowym 1 pęczek zielonych szparagów 4 jajka 20 g masła 2 łyżki posiekanego koperku sok z ¼ cytryny sól, pieprz szparagi ↔ fasolka szparagowa (+5 min) albo brokuł w różyczkach">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>001</div>
   <div class="rc-title">
@@ -575,7 +611,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez soku z cytryny (cytrusy), tylko młode, cienkie szparagi</p></div>
  </footer>
 </article>
-<article class="rc" id="p2" data-season="wiosna" data-diff="1" data-rate="4" data-time="20" data-kcal="210" data-prot="23" data-diet="N" data-veg="1" data-alg="mleko" data-text="młoda kalarepa z twarożkiem szczypiorkowym 2 młode kalarepy 200 g twarogu półtłustego 3 łyżki jogurtu naturalnego pęczek szczypiorku 3 rzodkiewki sól, pieprz kalarepa ↔ rzepa, młoda marchew w plastrach">
+<article class="rc" id="p2" data-season="wiosna" data-diff="1" data-rate="4" data-time="20" data-kcal="210" data-prot="23" data-diet="N" data-veg="1" data-alg="mleko" data-ing="2 młode kalarepy 200 g twarogu półtłustego 3 łyżki jogurtu naturalnego pęczek szczypiorku 3 rzodkiewki sól, pieprz" data-text="młoda kalarepa z twarożkiem szczypiorkowym 2 młode kalarepy 200 g twarogu półtłustego 3 łyżki jogurtu naturalnego pęczek szczypiorku 3 rzodkiewki sól, pieprz kalarepa ↔ rzepa, młoda marchew w plastrach">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>002</div>
   <div class="rc-title">
@@ -609,7 +645,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p3" data-season="wiosna" data-diff="2" data-rate="5" data-time="29" data-kcal="190" data-prot="28" data-diet="Z" data-veg="0" data-alg="ryby" data-text="dorsz z wiosennymi warzywami w kopercie 2 filety z dorsza (ok. 300 g) 1 młoda marchewka 4 rzodkiewki 2 dymki garść szpinaku 1 łyżka oliwy plasterki cytryny, koperek, sól dorsz ↔ mintaj (−2 min), pstrąg filet; szpinak ↔ botwina">
+<article class="rc" id="p3" data-season="wiosna" data-diff="2" data-rate="5" data-time="29" data-kcal="190" data-prot="28" data-diet="Z" data-veg="0" data-alg="ryby" data-ing="2 filety z dorsza (ok. 300 g) 1 młoda marchewka 4 rzodkiewki 2 dymki garść szpinaku 1 łyżka oliwy plasterki cytryny, koperek, sól" data-text="dorsz z wiosennymi warzywami w kopercie 2 filety z dorsza (ok. 300 g) 1 młoda marchewka 4 rzodkiewki 2 dymki garść szpinaku 1 łyżka oliwy plasterki cytryny, koperek, sól dorsz ↔ mintaj (−2 min), pstrąg filet; szpinak ↔ botwina">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>003</div>
   <div class="rc-title">
@@ -643,7 +679,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez rzodkiewki, dymki i cytryny – w kopercie tylko marchew i szpinak</p></div>
  </footer>
 </article>
-<article class="rc" id="p4" data-season="wiosna" data-diff="1" data-rate="4" data-time="35" data-kcal="290" data-prot="10" data-diet="Z" data-veg="1" data-alg="mleko" data-text="botwinka parowana z ziemniakami i jogurtem 1 pęczek botwinki 600 g młodych ziemniaków 200 g jogurtu greckiego 1 ząbek czosnku koperek sól, pieprz, sok z cytryny botwina ↔ szpinak (2 min), młoda kapusta w paskach (8 min)">
+<article class="rc" id="p4" data-season="wiosna" data-diff="1" data-rate="4" data-time="35" data-kcal="290" data-prot="10" data-diet="Z" data-veg="1" data-alg="mleko" data-ing="1 pęczek botwinki 600 g młodych ziemniaków 200 g jogurtu greckiego 1 ząbek czosnku koperek sól, pieprz, sok z cytryny" data-text="botwinka parowana z ziemniakami i jogurtem 1 pęczek botwinki 600 g młodych ziemniaków 200 g jogurtu greckiego 1 ząbek czosnku koperek sól, pieprz, sok z cytryny botwina ↔ szpinak (2 min), młoda kapusta w paskach (8 min)">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>004</div>
   <div class="rc-title">
@@ -677,7 +713,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>jogurt naturalny 2% zamiast greckiego, bez czosnku i cytryny</p></div>
  </footer>
 </article>
-<article class="rc" id="p5" data-season="wiosna" data-diff="2" data-rate="5" data-time="33" data-kcal="340" data-prot="48" data-diet="T" data-veg="0" data-alg="mleko" data-text="kurczak w ziołach z młodą marchewką 2 piersi z kurczaka 1 pęczek młodej marchwi 1 łyżeczka suszonego tymianku ½ łyżeczki słodkiej papryki 1 łyżeczka miodu 10 g masła sól, pieprz, natka marchew ↔ pietruszka, pasternak; kurczak ↔ indyk (+2 min)">
+<article class="rc" id="p5" data-season="wiosna" data-diff="2" data-rate="5" data-time="33" data-kcal="340" data-prot="48" data-diet="T" data-veg="0" data-alg="mleko" data-ing="2 piersi z kurczaka 1 pęczek młodej marchwi 1 łyżeczka suszonego tymianku ½ łyżeczki słodkiej papryki 1 łyżeczka miodu 10 g masła sól, pieprz, natka" data-text="kurczak w ziołach z młodą marchewką 2 piersi z kurczaka 1 pęczek młodej marchwi 1 łyżeczka suszonego tymianku ½ łyżeczki słodkiej papryki 1 łyżeczka miodu 10 g masła sól, pieprz, natka marchew ↔ pietruszka, pasternak; kurczak ↔ indyk (+2 min)">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>005</div>
   <div class="rc-title">
@@ -711,7 +747,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p6" data-season="wiosna" data-diff="1" data-rate="4" data-time="15" data-kcal="150" data-prot="12" data-diet="Z" data-veg="1" data-alg="mleko jaja" data-text="szpinak z jajkiem w kokilce 150 g młodego szpinaku 2 jajka 2 łyżki tartego sera żółtego 1 łyżka śmietanki gałka muszkatołowa, sól, pieprz szpinak ↔ jarmuż drobno (+2 min), pokrzywa">
+<article class="rc" id="p6" data-season="wiosna" data-diff="1" data-rate="4" data-time="15" data-kcal="150" data-prot="12" data-diet="Z" data-veg="1" data-alg="mleko jaja" data-ing="150 g młodego szpinaku 2 jajka 2 łyżki tartego sera żółtego 1 łyżka śmietanki gałka muszkatołowa, sól, pieprz" data-text="szpinak z jajkiem w kokilce 150 g młodego szpinaku 2 jajka 2 łyżki tartego sera żółtego 1 łyżka śmietanki gałka muszkatołowa, sól, pieprz szpinak ↔ jarmuż drobno (+2 min), pokrzywa">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>006</div>
   <div class="rc-title">
@@ -745,7 +781,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez sera żółtego (ewentualnie mozzarella light), mleko 2% zamiast śmietanki</p></div>
  </footer>
 </article>
-<article class="rc" id="p7" data-season="wiosna" data-diff="1" data-rate="5" data-time="27" data-kcal="350" data-prot="13" data-diet="T" data-veg="1" data-alg="mleko" data-text="młode ziemniaki z koperkiem i kefirem 1 kg młodych ziemniaków duży pęczek koperku 20 g masła sól 4 szklanki kefiru lub zsiadłego mleka ziemniaki ↔ bataty (−5 min), kalarepa">
+<article class="rc" id="p7" data-season="wiosna" data-diff="1" data-rate="5" data-time="27" data-kcal="350" data-prot="13" data-diet="T" data-veg="1" data-alg="mleko" data-ing="1 kg młodych ziemniaków duży pęczek koperku 20 g masła sól 4 szklanki kefiru lub zsiadłego mleka" data-text="młode ziemniaki z koperkiem i kefirem 1 kg młodych ziemniaków duży pęczek koperku 20 g masła sól 4 szklanki kefiru lub zsiadłego mleka ziemniaki ↔ bataty (−5 min), kalarepa">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>007</div>
   <div class="rc-title">
@@ -779,7 +815,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p8" data-season="wiosna" data-diff="2" data-rate="4" data-time="40" data-kcal="310" data-prot="49" data-diet="Z" data-veg="0" data-alg="" data-text="indyk z rabarbarowym chutneyem 400 g polędwiczki z indyka 2 łodygi rabarbaru 1 mała cebula 2 łyżki miodu 1 łyżka octu jabłkowego szczypta imbiru, sól, pieprz rabarbar ↔ kwaśne jabłko, żurawina; indyk ↔ kurczak">
+<article class="rc" id="p8" data-season="wiosna" data-diff="2" data-rate="4" data-time="40" data-kcal="310" data-prot="49" data-diet="Z" data-veg="0" data-alg="" data-ing="400 g polędwiczki z indyka 2 łodygi rabarbaru 1 mała cebula 2 łyżki miodu 1 łyżka octu jabłkowego szczypta imbiru, sól, pieprz" data-text="indyk z rabarbarowym chutneyem 400 g polędwiczki z indyka 2 łodygi rabarbaru 1 mała cebula 2 łyżki miodu 1 łyżka octu jabłkowego szczypta imbiru, sól, pieprz rabarbar ↔ kwaśne jabłko, żurawina; indyk ↔ kurczak">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>008</div>
   <div class="rc-title">
@@ -813,7 +849,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>zamiast chutneya (cebula, ocet, rabarbar) mus z jabłka z imbirem</p></div>
  </footer>
 </article>
-<article class="rc" id="p9" data-season="wiosna" data-diff="1" data-rate="4" data-time="18" data-kcal="120" data-prot="6" data-diet="N" data-veg="1" data-alg="gluten mleko jaja" data-text="kalafior z bułką tartą po polsku 1 kalafior 2 łyżki bułki tartej 20 g masła 1 jajko na twardo (opcjonalnie) natka, sól kalafior ↔ brokuł (−3 min), romanesco">
+<article class="rc" id="p9" data-season="wiosna" data-diff="1" data-rate="4" data-time="18" data-kcal="120" data-prot="6" data-diet="N" data-veg="1" data-alg="gluten mleko jaja" data-ing="1 kalafior 2 łyżki bułki tartej 20 g masła 1 jajko na twardo (opcjonalnie) natka, sól" data-text="kalafior z bułką tartą po polsku 1 kalafior 2 łyżki bułki tartej 20 g masła 1 jajko na twardo (opcjonalnie) natka, sól kalafior ↔ brokuł (−3 min), romanesco">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>009</div>
   <div class="rc-title">
@@ -847,7 +883,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p10" data-season="wiosna" data-diff="2" data-rate="5" data-time="40" data-kcal="270" data-prot="28" data-diet="Z" data-veg="0" data-alg="gluten mleko jaja" data-text="pulpety drobiowe w sosie koperkowym 500 g mielonego mięsa z kurczaka lub indyka 1 jajko 3 łyżki płatków owsianych 1 mała cebula drobno 200 g jogurtu 1 łyżeczka mąki koperek, sól, pieprz koperek ↔ szczypiorek, natka; jogurt ↔ śmietana 12%">
+<article class="rc" id="p10" data-season="wiosna" data-diff="2" data-rate="5" data-time="40" data-kcal="270" data-prot="28" data-diet="Z" data-veg="0" data-alg="gluten mleko jaja" data-ing="500 g mielonego mięsa z kurczaka lub indyka 1 jajko 3 łyżki płatków owsianych 1 mała cebula drobno 200 g jogurtu 1 łyżeczka mąki koperek, sól, pieprz" data-text="pulpety drobiowe w sosie koperkowym 500 g mielonego mięsa z kurczaka lub indyka 1 jajko 3 łyżki płatków owsianych 1 mała cebula drobno 200 g jogurtu 1 łyżeczka mąki koperek, sól, pieprz koperek ↔ szczypiorek, natka; jogurt ↔ śmietana 12%">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>010</div>
   <div class="rc-title">
@@ -881,7 +917,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez cebuli, płatki owsiane błyskawiczne, jogurt 2%</p></div>
  </footer>
 </article>
-<article class="rc" id="p11" data-season="wiosna" data-diff="1" data-rate="4" data-time="17" data-kcal="190" data-prot="5" data-diet="N" data-veg="1" data-alg="gorczyca" data-text="sałatka z ciepłych nowalijek 200 g szparagów lub fasolki 150 g groszku cukrowego 1 pęczek rzodkiewek 1 łyżeczka musztardy 1 łyżka miodu 2 łyżki oliwy 1 łyżka soku z cytryny rukiew wodna lub sałata rzodkiewka ↔ kalarepa w słupkach; groszek cukrowy ↔ mrożony groszek (3 min)">
+<article class="rc" id="p11" data-season="wiosna" data-diff="1" data-rate="4" data-time="17" data-kcal="190" data-prot="5" data-diet="N" data-veg="1" data-alg="gorczyca" data-ing="200 g szparagów lub fasolki 150 g groszku cukrowego 1 pęczek rzodkiewek 1 łyżeczka musztardy 1 łyżka miodu 2 łyżki oliwy 1 łyżka soku z cytryny rukiew wodna lub sałata" data-text="sałatka z ciepłych nowalijek 200 g szparagów lub fasolki 150 g groszku cukrowego 1 pęczek rzodkiewek 1 łyżeczka musztardy 1 łyżka miodu 2 łyżki oliwy 1 łyżka soku z cytryny rukiew wodna lub sałata rzodkiewka ↔ kalarepa w słupkach; groszek cukrowy ↔ mrożony groszek (3 min)">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>011</div>
   <div class="rc-title">
@@ -915,7 +951,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p12" data-season="wiosna" data-diff="1" data-rate="5" data-time="22" data-kcal="480" data-prot="32" data-diet="Z" data-veg="0" data-alg="ryby" data-text="łosoś z czosnkiem niedźwiedzim 2 kawałki łososia (ok. 300 g) garść czosnku niedźwiedziego 2 łyżki pestek słonecznika 3 łyżki oliwy sok z cytryny, sól łosoś ↔ pstrąg (tańszy, −2 min); czosnek niedźwiedzi ↔ natka + 1 ząbek czosnku">
+<article class="rc" id="p12" data-season="wiosna" data-diff="1" data-rate="5" data-time="22" data-kcal="480" data-prot="32" data-diet="Z" data-veg="0" data-alg="ryby" data-ing="2 kawałki łososia (ok. 300 g) garść czosnku niedźwiedziego 2 łyżki pestek słonecznika 3 łyżki oliwy sok z cytryny, sól" data-text="łosoś z czosnkiem niedźwiedzim 2 kawałki łososia (ok. 300 g) garść czosnku niedźwiedziego 2 łyżki pestek słonecznika 3 łyżki oliwy sok z cytryny, sól łosoś ↔ pstrąg (tańszy, −2 min); czosnek niedźwiedzi ↔ natka + 1 ząbek czosnku">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>012</div>
   <div class="rc-title">
@@ -949,7 +985,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>zamiast pesto czosnkowego oliwa z koperkiem, bez pestek</p></div>
  </footer>
 </article>
-<article class="rc" id="p13" data-season="wiosna" data-diff="2" data-rate="4" data-time="30" data-kcal="450" data-prot="38" data-diet="Z" data-veg="1" data-alg="gluten mleko jaja" data-text="kluski twarogowe z truskawkami 500 g twarogu półtłustego 1 jajko 120 g mąki 1 łyżka cukru szczypta soli 300 g truskawek 100 g jogurtu truskawki ↔ rabarbar duszony, mrożone owoce">
+<article class="rc" id="p13" data-season="wiosna" data-diff="2" data-rate="4" data-time="30" data-kcal="450" data-prot="38" data-diet="Z" data-veg="1" data-alg="gluten mleko jaja" data-ing="500 g twarogu półtłustego 1 jajko 120 g mąki 1 łyżka cukru szczypta soli 300 g truskawek 100 g jogurtu" data-text="kluski twarogowe z truskawkami 500 g twarogu półtłustego 1 jajko 120 g mąki 1 łyżka cukru szczypta soli 300 g truskawek 100 g jogurtu truskawki ↔ rabarbar duszony, mrożone owoce">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>013</div>
   <div class="rc-title">
@@ -983,7 +1019,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez cukru; zamiast truskawek mus z moreli lub przetarte jagody</p></div>
  </footer>
 </article>
-<article class="rc" id="p14" data-season="wiosna" data-diff="1" data-rate="4" data-time="20" data-kcal="100" data-prot="3" data-diet="N" data-veg="1" data-alg="mleko" data-text="młoda kapusta z koperkiem 1 główka młodej kapusty 1 młoda marchewka 20 g masła 1 łyżka soku z cytryny koperek, sól, pieprz młoda kapusta ↔ kapusta pekińska (5 min), włoska">
+<article class="rc" id="p14" data-season="wiosna" data-diff="1" data-rate="4" data-time="20" data-kcal="100" data-prot="3" data-diet="N" data-veg="1" data-alg="mleko" data-ing="1 główka młodej kapusty 1 młoda marchewka 20 g masła 1 łyżka soku z cytryny koperek, sól, pieprz" data-text="młoda kapusta z koperkiem 1 główka młodej kapusty 1 młoda marchewka 20 g masła 1 łyżka soku z cytryny koperek, sól, pieprz młoda kapusta ↔ kapusta pekińska (5 min), włoska">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>014</div>
   <div class="rc-title">
@@ -1017,7 +1053,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p15" data-season="wiosna" data-diff="1" data-rate="4" data-time="28" data-kcal="360" data-prot="40" data-diet="Z" data-veg="0" data-alg="mleko ryby" data-text="mintaj z sosem chrzanowym i ziemniakami 400 g filetów mintaja 500 g ziemniaków 3 łyżki jogurtu 1 łyżka chrzanu koperek, sól, cytryna mintaj ↔ dorsz, morszczuk; ziemniaki ↔ kasza w misce">
+<article class="rc" id="p15" data-season="wiosna" data-diff="1" data-rate="4" data-time="28" data-kcal="360" data-prot="40" data-diet="Z" data-veg="0" data-alg="mleko ryby" data-ing="400 g filetów mintaja 500 g ziemniaków 3 łyżki jogurtu 1 łyżka chrzanu koperek, sól, cytryna" data-text="mintaj z sosem chrzanowym i ziemniakami 400 g filetów mintaja 500 g ziemniaków 3 łyżki jogurtu 1 łyżka chrzanu koperek, sól, cytryna mintaj ↔ dorsz, morszczuk; ziemniaki ↔ kasza w misce">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>015</div>
   <div class="rc-title">
@@ -1051,7 +1087,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>sos jogurtowy z koperkiem zamiast chrzanowego</p></div>
  </footer>
 </article>
-<article class="rc" id="p16" data-season="wiosna" data-diff="1" data-rate="4" data-time="25" data-kcal="150" data-prot="9" data-diet="Z" data-veg="1" data-alg="mleko" data-text="brokułowo-groszkowy krem z parowaru 1 brokuł 1 ziemniak 200 g groszku (może być mrożony) 800 ml bulionu 2 łyżki jogurtu gałka, sól, pieprz pestki dyni brokuł ↔ kalafior (krem biały), cukinia (−4 min)">
+<article class="rc" id="p16" data-season="wiosna" data-diff="1" data-rate="4" data-time="25" data-kcal="150" data-prot="9" data-diet="Z" data-veg="1" data-alg="mleko" data-ing="1 brokuł 1 ziemniak 200 g groszku (może być mrożony) 800 ml bulionu 2 łyżki jogurtu gałka, sól, pieprz pestki dyni" data-text="brokułowo-groszkowy krem z parowaru 1 brokuł 1 ziemniak 200 g groszku (może być mrożony) 800 ml bulionu 2 łyżki jogurtu gałka, sól, pieprz pestki dyni brokuł ↔ kalafior (krem biały), cukinia (−4 min)">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>016</div>
   <div class="rc-title">
@@ -1085,7 +1121,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez groszku (więcej ziemniaka), bez pestek dyni, bulion domowy bez kostki</p></div>
  </footer>
 </article>
-<article class="rc" id="p17" data-season="wiosna" data-diff="1" data-rate="4" data-time="29" data-kcal="200" data-prot="14" data-diet="N" data-veg="1" data-alg="mleko jaja gorczyca" data-text="jajka faszerowane szczypiorem 8 jajek 2 łyżki majonezu 2 łyżki jogurtu 1 łyżeczka musztardy szczypiorek, rzeżucha sól, pieprz szczypior ↔ rzeżucha, koperek">
+<article class="rc" id="p17" data-season="wiosna" data-diff="1" data-rate="4" data-time="29" data-kcal="200" data-prot="14" data-diet="N" data-veg="1" data-alg="mleko jaja gorczyca" data-ing="8 jajek 2 łyżki majonezu 2 łyżki jogurtu 1 łyżeczka musztardy szczypiorek, rzeżucha sól, pieprz" data-text="jajka faszerowane szczypiorem 8 jajek 2 łyżki majonezu 2 łyżki jogurtu 1 łyżeczka musztardy szczypiorek, rzeżucha sól, pieprz szczypior ↔ rzeżucha, koperek">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>017</div>
   <div class="rc-title">
@@ -1119,7 +1155,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p18" data-season="wiosna" data-diff="2" data-rate="4" data-time="38" data-kcal="290" data-prot="8" data-diet="Z" data-veg="1" data-alg="" data-text="kasza jaglana z młodymi warzywami 150 g kaszy jaglanej 300 ml wody 1 młoda marchew 1 kalarepa 100 g groszku 2 łyżki oliwy natka, sól, sok z cytryny jaglana ↔ bulgur (15 min), komosa (20 min)">
+<article class="rc" id="p18" data-season="wiosna" data-diff="2" data-rate="4" data-time="38" data-kcal="290" data-prot="8" data-diet="Z" data-veg="1" data-alg="" data-ing="150 g kaszy jaglanej 300 ml wody 1 młoda marchew 1 kalarepa 100 g groszku 2 łyżki oliwy natka, sól, sok z cytryny" data-text="kasza jaglana z młodymi warzywami 150 g kaszy jaglanej 300 ml wody 1 młoda marchew 1 kalarepa 100 g groszku 2 łyżki oliwy natka, sól, sok z cytryny jaglana ↔ bulgur (15 min), komosa (20 min)">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>018</div>
   <div class="rc-title">
@@ -1153,7 +1189,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>zamiast kalarepy i groszku marchew i obrana cukinia</p></div>
  </footer>
 </article>
-<article class="rc" id="p19" data-season="wiosna" data-diff="2" data-rate="5" data-time="20" data-kcal="290" data-prot="32" data-diet="Z" data-veg="0" data-alg="mleko ryby orzechy" data-text="pstrąg z migdałami i natką 2 pstrągi (filety) 2 łyżki płatków migdałów 10 g masła natka, cytryna, sól pstrąg ↔ łosoś, dorsz; migdały ↔ słonecznik">
+<article class="rc" id="p19" data-season="wiosna" data-diff="2" data-rate="5" data-time="20" data-kcal="290" data-prot="32" data-diet="Z" data-veg="0" data-alg="mleko ryby orzechy" data-ing="2 pstrągi (filety) 2 łyżki płatków migdałów 10 g masła natka, cytryna, sól" data-text="pstrąg z migdałami i natką 2 pstrągi (filety) 2 łyżki płatków migdałów 10 g masła natka, cytryna, sól pstrąg ↔ łosoś, dorsz; migdały ↔ słonecznik">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>019</div>
   <div class="rc-title">
@@ -1187,7 +1223,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez migdałów – odrobina masła i koperek</p></div>
  </footer>
 </article>
-<article class="rc" id="p20" data-season="wiosna" data-diff="3" data-rate="4" data-time="30" data-kcal="230" data-prot="10" data-diet="Z" data-veg="1" data-alg="mleko jaja gorczyca" data-text="szparagi białe z sosem holenderskim na skróty 1 pęczek białych szparagów 2 żółtka 100 g jogurtu greckiego 1 łyżeczka musztardy sok z ½ cytryny 20 g masła sól białe ↔ zielone szparagi (−5 min, bez obierania)">
+<article class="rc" id="p20" data-season="wiosna" data-diff="3" data-rate="4" data-time="30" data-kcal="230" data-prot="10" data-diet="Z" data-veg="1" data-alg="mleko jaja gorczyca" data-ing="1 pęczek białych szparagów 2 żółtka 100 g jogurtu greckiego 1 łyżeczka musztardy sok z ½ cytryny 20 g masła sól" data-text="szparagi białe z sosem holenderskim na skróty 1 pęczek białych szparagów 2 żółtka 100 g jogurtu greckiego 1 łyżeczka musztardy sok z ½ cytryny 20 g masła sól białe ↔ zielone szparagi (−5 min, bez obierania)">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>020</div>
   <div class="rc-title">
@@ -1221,7 +1257,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>zamiast sosu holenderskiego jogurt 2% z koperkiem</p></div>
  </footer>
 </article>
-<article class="rc" id="p21" data-season="wiosna" data-diff="2" data-rate="3" data-time="30" data-kcal="280" data-prot="11" data-diet="Z" data-veg="1" data-alg="gluten mleko jaja" data-text="owsiane bułeczki na parze z twarożkiem 150 g mąki 50 g płatków owsianych 2 łyżeczki proszku do pieczenia 1 jajko 150 ml mleka szczypta soli twarożek ze szczypiorem do podania mleko ↔ kefir; płatki ↔ otręby">
+<article class="rc" id="p21" data-season="wiosna" data-diff="2" data-rate="3" data-time="30" data-kcal="280" data-prot="11" data-diet="Z" data-veg="1" data-alg="gluten mleko jaja" data-ing="150 g mąki 50 g płatków owsianych 2 łyżeczki proszku do pieczenia 1 jajko 150 ml mleka szczypta soli twarożek ze szczypiorem do podania" data-text="owsiane bułeczki na parze z twarożkiem 150 g mąki 50 g płatków owsianych 2 łyżeczki proszku do pieczenia 1 jajko 150 ml mleka szczypta soli twarożek ze szczypiorem do podania mleko ↔ kefir; płatki ↔ otręby">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>021</div>
   <div class="rc-title">
@@ -1255,7 +1291,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>płatki owsiane błyskawiczne, mleko 2%, twarożek z koperkiem zamiast szczypioru</p></div>
  </footer>
 </article>
-<article class="rc" id="p22" data-season="wiosna" data-diff="1" data-rate="4" data-time="17" data-kcal="260" data-prot="7" data-diet="N" data-veg="1" data-alg="gluten mleko" data-text="rabarbar z kruszonką owsianą 3 łodygi rabarbaru 2 łyżki cukru lub miodu 4 łyżki płatków owsianych 1 łyżka masła 1 łyżka cukru trzcinowego jogurt do podania rabarbar ↔ jabłko w kostce (10 min), truskawki (3 min)">
+<article class="rc" id="p22" data-season="wiosna" data-diff="1" data-rate="4" data-time="17" data-kcal="260" data-prot="7" data-diet="N" data-veg="1" data-alg="gluten mleko" data-ing="3 łodygi rabarbaru 2 łyżki cukru lub miodu 4 łyżki płatków owsianych 1 łyżka masła 1 łyżka cukru trzcinowego jogurt do podania" data-text="rabarbar z kruszonką owsianą 3 łodygi rabarbaru 2 łyżki cukru lub miodu 4 łyżki płatków owsianych 1 łyżka masła 1 łyżka cukru trzcinowego jogurt do podania rabarbar ↔ jabłko w kostce (10 min), truskawki (3 min)">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>022</div>
   <div class="rc-title">
@@ -1289,7 +1325,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p23" data-season="wiosna" data-diff="2" data-rate="5" data-time="35" data-kcal="380" data-prot="32" data-diet="T" data-veg="0" data-alg="gluten mleko jaja" data-text="pulpety z indyka z puree z młodej marchwi 400 g mielonego indyka 1 kajzerka namoczona w mleku 2% 1 jajko 500 g młodej marchwi 10 g masła 3 łyżki mleka 2% koperek, szczypta soli indyk ↔ kurczak, cielęcina; marchew ↔ dynia, pietruszka">
+<article class="rc" id="p23" data-season="wiosna" data-diff="2" data-rate="5" data-time="35" data-kcal="380" data-prot="32" data-diet="T" data-veg="0" data-alg="gluten mleko jaja" data-ing="400 g mielonego indyka 1 kajzerka namoczona w mleku 2% 1 jajko 500 g młodej marchwi 10 g masła 3 łyżki mleka 2% koperek, szczypta soli" data-text="pulpety z indyka z puree z młodej marchwi 400 g mielonego indyka 1 kajzerka namoczona w mleku 2% 1 jajko 500 g młodej marchwi 10 g masła 3 łyżki mleka 2% koperek, szczypta soli indyk ↔ kurczak, cielęcina; marchew ↔ dynia, pietruszka">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>023</div>
   <div class="rc-title">
@@ -1323,7 +1359,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p24" data-season="wiosna" data-diff="1" data-rate="4" data-time="28" data-kcal="390" data-prot="35" data-diet="T" data-veg="0" data-alg="mleko ryby" data-text="dorsz z puree ziemniaczano-szpinakowym 300 g filetu z dorsza 500 g ziemniaków 100 g młodego szpinaku 100 ml mleka 2% 10 g masła koperek, sól dorsz ↔ morszczuk, mintaj; szpinak ↔ starta cukinia">
+<article class="rc" id="p24" data-season="wiosna" data-diff="1" data-rate="4" data-time="28" data-kcal="390" data-prot="35" data-diet="T" data-veg="0" data-alg="mleko ryby" data-ing="300 g filetu z dorsza 500 g ziemniaków 100 g młodego szpinaku 100 ml mleka 2% 10 g masła koperek, sól" data-text="dorsz z puree ziemniaczano-szpinakowym 300 g filetu z dorsza 500 g ziemniaków 100 g młodego szpinaku 100 ml mleka 2% 10 g masła koperek, sól dorsz ↔ morszczuk, mintaj; szpinak ↔ starta cukinia">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>024</div>
   <div class="rc-title">
@@ -1357,7 +1393,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p25" data-season="wiosna" data-diff="1" data-rate="4" data-time="15" data-kcal="180" data-prot="15" data-diet="T" data-veg="1" data-alg="gluten mleko jaja" data-text="jajecznica na parze z koperkiem i pomidorem 4 jajka 4 łyżki mleka 2% 1 pomidor koperek szczypta soli jasne pieczywo do podania pomidor ↔ starta cukinia, szpinak">
+<article class="rc" id="p25" data-season="wiosna" data-diff="1" data-rate="4" data-time="15" data-kcal="180" data-prot="15" data-diet="T" data-veg="1" data-alg="gluten mleko jaja" data-ing="4 jajka 4 łyżki mleka 2% 1 pomidor koperek szczypta soli jasne pieczywo do podania" data-text="jajecznica na parze z koperkiem i pomidorem 4 jajka 4 łyżki mleka 2% 1 pomidor koperek szczypta soli jasne pieczywo do podania pomidor ↔ starta cukinia, szpinak">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>025</div>
   <div class="rc-title">
@@ -1391,7 +1427,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p26" data-season="wiosna" data-diff="1" data-rate="4" data-time="26" data-kcal="160" data-prot="6" data-diet="T" data-veg="1" data-alg="gluten mleko" data-text="krem z młodej marchwi z grzankami 600 g młodej marchwi 2 ziemniaki 800 ml wody lub domowego bulionu warzywnego 100 ml mleka 2% ½ łyżeczki startego imbiru natka 2 kromki jasnego pieczywa marchew ↔ dynia, pietruszka">
+<article class="rc" id="p26" data-season="wiosna" data-diff="1" data-rate="4" data-time="26" data-kcal="160" data-prot="6" data-diet="T" data-veg="1" data-alg="gluten mleko" data-ing="600 g młodej marchwi 2 ziemniaki 800 ml wody lub domowego bulionu warzywnego 100 ml mleka 2% ½ łyżeczki startego imbiru natka 2 kromki jasnego pieczywa" data-text="krem z młodej marchwi z grzankami 600 g młodej marchwi 2 ziemniaki 800 ml wody lub domowego bulionu warzywnego 100 ml mleka 2% ½ łyżeczki startego imbiru natka 2 kromki jasnego pieczywa marchew ↔ dynia, pietruszka">
  <header class="rc-head">
   <div class="rc-no" title="Wiosna"><span>W</span>026</div>
   <div class="rc-title">
@@ -1448,7 +1484,7 @@ body.searching .rc.open .rc-desc{display:block}
   </div>
  </div>
  <div class="recipes">
-<article class="rc" id="p27" data-season="lato" data-diff="1" data-rate="5" data-time="23" data-kcal="110" data-prot="5" data-diet="Z" data-veg="1" data-alg="gluten mleko jaja" data-text="fasolka szparagowa z bułką i jajkiem 600 g fasolki szparagowej (żółtej lub zielonej) 2 łyżki bułki tartej 15 g masła 1 jajko na twardo sól fasolka ↔ szparagi (−5 min), brokuł">
+<article class="rc" id="p27" data-season="lato" data-diff="1" data-rate="5" data-time="23" data-kcal="110" data-prot="5" data-diet="Z" data-veg="1" data-alg="gluten mleko jaja" data-ing="600 g fasolki szparagowej (żółtej lub zielonej) 2 łyżki bułki tartej 15 g masła 1 jajko na twardo sól" data-text="fasolka szparagowa z bułką i jajkiem 600 g fasolki szparagowej (żółtej lub zielonej) 2 łyżki bułki tartej 15 g masła 1 jajko na twardo sól fasolka ↔ szparagi (−5 min), brokuł">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>027</div>
   <div class="rc-title">
@@ -1482,7 +1518,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>tylko młoda fasolka; bez bułki rumienionej i jajka na twardo – z masłem i jajkiem na miękko</p></div>
  </footer>
 </article>
-<article class="rc" id="p28" data-season="lato" data-diff="1" data-rate="5" data-time="20" data-kcal="210" data-prot="18" data-diet="N" data-veg="1" data-alg="mleko" data-text="bób z masłem i koperkiem 1 kg bobu 20 g masła koperek sól gruboziarnista bób ↔ fasola edamame mrożona (8 min)">
+<article class="rc" id="p28" data-season="lato" data-diff="1" data-rate="5" data-time="20" data-kcal="210" data-prot="18" data-diet="N" data-veg="1" data-alg="mleko" data-ing="1 kg bobu 20 g masła koperek sól gruboziarnista" data-text="bób z masłem i koperkiem 1 kg bobu 20 g masła koperek sól gruboziarnista bób ↔ fasola edamame mrożona (8 min)">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>028</div>
   <div class="rc-title">
@@ -1516,7 +1552,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p29" data-season="lato" data-diff="2" data-rate="4" data-time="32" data-kcal="130" data-prot="6" data-diet="Z" data-veg="1" data-alg="gluten mleko" data-text="cukinia faszerowana kaszą i fetą 2 średnie cukinie 100 g ugotowanego bulguru 1 pomidor 80 g fety lub sera typu feta 1 ząbek czosnku bazylia, oliwa, pieprz cukinia ↔ patison, duża papryka (15 min); bulgur ↔ ryż ugotowany">
+<article class="rc" id="p29" data-season="lato" data-diff="2" data-rate="4" data-time="32" data-kcal="130" data-prot="6" data-diet="Z" data-veg="1" data-alg="gluten mleko" data-ing="2 średnie cukinie 100 g ugotowanego bulguru 1 pomidor 80 g fety lub sera typu feta 1 ząbek czosnku bazylia, oliwa, pieprz" data-text="cukinia faszerowana kaszą i fetą 2 średnie cukinie 100 g ugotowanego bulguru 1 pomidor 80 g fety lub sera typu feta 1 ząbek czosnku bazylia, oliwa, pieprz cukinia ↔ patison, duża papryka (15 min); bulgur ↔ ryż ugotowany">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>029</div>
   <div class="rc-title">
@@ -1550,7 +1586,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>kuskus zamiast bulguru, twarożek półtłusty zamiast fety, bez czosnku, pomidor bez skórki</p></div>
  </footer>
 </article>
-<article class="rc" id="p30" data-season="lato" data-diff="1" data-rate="4" data-time="23" data-kcal="100" data-prot="6" data-diet="N" data-veg="1" data-alg="mleko" data-text="kalafior z kurkumą i jogurtem miętowym 1 kalafior 1 łyżeczka kurkumy ½ łyżeczki kminu 1 łyżka oleju 200 g jogurtu kilka listków mięty sól, cytryna kalafior ↔ brokuł, ziemniaki w kostce (18 min)">
+<article class="rc" id="p30" data-season="lato" data-diff="1" data-rate="4" data-time="23" data-kcal="100" data-prot="6" data-diet="N" data-veg="1" data-alg="mleko" data-ing="1 kalafior 1 łyżeczka kurkumy ½ łyżeczki kminu 1 łyżka oleju 200 g jogurtu kilka listków mięty sól, cytryna" data-text="kalafior z kurkumą i jogurtem miętowym 1 kalafior 1 łyżeczka kurkumy ½ łyżeczki kminu 1 łyżka oleju 200 g jogurtu kilka listków mięty sól, cytryna kalafior ↔ brokuł, ziemniaki w kostce (18 min)">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>030</div>
   <div class="rc-title">
@@ -1584,7 +1620,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p31" data-season="lato" data-diff="1" data-rate="5" data-time="29" data-kcal="260" data-prot="43" data-diet="Z" data-veg="0" data-alg="mleko" data-text="kurczak z cukinią i papryką 500 g piersi z kurczaka 1 cukinia 1 czerwona papryka 1 łyżeczka papryki wędzonej 200 g jogurtu 1 ząbek czosnku sól, pieprz, natka papryka ↔ fasolka (12 min); cukinia ↔ bakłażan w kostce (10 min)">
+<article class="rc" id="p31" data-season="lato" data-diff="1" data-rate="5" data-time="29" data-kcal="260" data-prot="43" data-diet="Z" data-veg="0" data-alg="mleko" data-ing="500 g piersi z kurczaka 1 cukinia 1 czerwona papryka 1 łyżeczka papryki wędzonej 200 g jogurtu 1 ząbek czosnku sól, pieprz, natka" data-text="kurczak z cukinią i papryką 500 g piersi z kurczaka 1 cukinia 1 czerwona papryka 1 łyżeczka papryki wędzonej 200 g jogurtu 1 ząbek czosnku sól, pieprz, natka papryka ↔ fasolka (12 min); cukinia ↔ bakłażan w kostce (10 min)">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>031</div>
   <div class="rc-title">
@@ -1618,7 +1654,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>papryka słodka zamiast wędzonej, paprykę obierz po parowaniu, sos bez czosnku – z koperkiem</p></div>
  </footer>
 </article>
-<article class="rc" id="p32" data-season="lato" data-diff="1" data-rate="5" data-time="25" data-kcal="180" data-prot="5" data-diet="N" data-veg="1" data-alg="mleko" data-text="kukurydza z masłem ziołowym 4 kolby kukurydzy cukrowej 30 g masła natka, szczypior 1 ząbek czosnku sól kukurydza ↔ mrożona w kolbach (25 min)">
+<article class="rc" id="p32" data-season="lato" data-diff="1" data-rate="5" data-time="25" data-kcal="180" data-prot="5" data-diet="N" data-veg="1" data-alg="mleko" data-ing="4 kolby kukurydzy cukrowej 30 g masła natka, szczypior 1 ząbek czosnku sól" data-text="kukurydza z masłem ziołowym 4 kolby kukurydzy cukrowej 30 g masła natka, szczypior 1 ząbek czosnku sól kukurydza ↔ mrożona w kolbach (25 min)">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>032</div>
   <div class="rc-title">
@@ -1652,7 +1688,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p33" data-season="lato" data-diff="1" data-rate="5" data-time="22" data-kcal="190" data-prot="28" data-diet="Z" data-veg="0" data-alg="ryby" data-text="dorsz z pomidorami i bazylią 2 filety z dorsza 2 pomidory 1 ząbek czosnku bazylia 1 łyżka oliwy kapary (opcjonalnie) sól, pieprz dorsz ↔ mintaj, tilapia; pomidory ↔ cukinia w plastrach">
+<article class="rc" id="p33" data-season="lato" data-diff="1" data-rate="5" data-time="22" data-kcal="190" data-prot="28" data-diet="Z" data-veg="0" data-alg="ryby" data-ing="2 filety z dorsza 2 pomidory 1 ząbek czosnku bazylia 1 łyżka oliwy kapary (opcjonalnie) sól, pieprz" data-text="dorsz z pomidorami i bazylią 2 filety z dorsza 2 pomidory 1 ząbek czosnku bazylia 1 łyżka oliwy kapary (opcjonalnie) sól, pieprz dorsz ↔ mintaj, tilapia; pomidory ↔ cukinia w plastrach">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>033</div>
   <div class="rc-title">
@@ -1686,7 +1722,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>pomidory bez skórki, bez czosnku i kaparów</p></div>
  </footer>
 </article>
-<article class="rc" id="p34" data-season="lato" data-diff="1" data-rate="4" data-time="30" data-kcal="300" data-prot="12" data-diet="Z" data-veg="1" data-alg="mleko orzechy siarczyny" data-text="młode buraczki z kozim serem i miodem 6 młodych buraczków 80 g sera koziego lub twarogu garść orzechów włoskich 1 łyżka miodu 1 łyżka octu balsamicznego rukola buraczki ↔ marchew w słupkach (15 min); kozi ser ↔ feta, twaróg">
+<article class="rc" id="p34" data-season="lato" data-diff="1" data-rate="4" data-time="30" data-kcal="300" data-prot="12" data-diet="Z" data-veg="1" data-alg="mleko orzechy siarczyny" data-ing="6 młodych buraczków 80 g sera koziego lub twarogu garść orzechów włoskich 1 łyżka miodu 1 łyżka octu balsamicznego rukola" data-text="młode buraczki z kozim serem i miodem 6 młodych buraczków 80 g sera koziego lub twarogu garść orzechów włoskich 1 łyżka miodu 1 łyżka octu balsamicznego rukola buraczki ↔ marchew w słupkach (15 min); kozi ser ↔ feta, twaróg">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>034</div>
   <div class="rc-title">
@@ -1720,7 +1756,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>twarożek półtłusty zamiast sera koziego, bez orzechów i octu, sałata zamiast rukoli</p></div>
  </footer>
 </article>
-<article class="rc" id="p35" data-season="lato" data-diff="1" data-rate="4" data-time="15" data-kcal="60" data-prot="2" data-diet="Z" data-veg="1" data-alg="mleko" data-text="patisony z czosnkiem i natką 4 małe patisony 1 ząbek czosnku 15 g masła natka, sól, pieprz patison ↔ cukinia (−2 min)">
+<article class="rc" id="p35" data-season="lato" data-diff="1" data-rate="4" data-time="15" data-kcal="60" data-prot="2" data-diet="Z" data-veg="1" data-alg="mleko" data-ing="4 małe patisony 1 ząbek czosnku 15 g masła natka, sól, pieprz" data-text="patisony z czosnkiem i natką 4 małe patisony 1 ząbek czosnku 15 g masła natka, sól, pieprz patison ↔ cukinia (−2 min)">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>035</div>
   <div class="rc-title">
@@ -1754,7 +1790,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez czosnku</p></div>
  </footer>
 </article>
-<article class="rc" id="p36" data-season="lato" data-diff="3" data-rate="5" data-time="70" data-kcal="610" data-prot="24" data-diet="Z" data-veg="1" data-alg="gluten mleko" data-text="pierogi ruskie na parze ciasto: 400 g mąki, 220 ml ciepłej wody, 1 łyżka oleju, sól farsz: 500 g ziemniaków, 250 g twarogu, 1 cebula sól, pieprz cebulka podsmażona do podania twaróg ↔ ser feta (pierogi greckie); ziemniaki ↔ kapusta z grzybami">
+<article class="rc" id="p36" data-season="lato" data-diff="3" data-rate="5" data-time="70" data-kcal="610" data-prot="24" data-diet="Z" data-veg="1" data-alg="gluten mleko" data-ing="ciasto: 400 g mąki, 220 ml ciepłej wody, 1 łyżka oleju, sól farsz: 500 g ziemniaków, 250 g twarogu, 1 cebula sól, pieprz cebulka podsmażona do podania" data-text="pierogi ruskie na parze ciasto: 400 g mąki, 220 ml ciepłej wody, 1 łyżka oleju, sól farsz: 500 g ziemniaków, 250 g twarogu, 1 cebula sól, pieprz cebulka podsmażona do podania twaróg ↔ ser feta (pierogi greckie); ziemniaki ↔ kapusta z grzybami">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>036</div>
   <div class="rc-title">
@@ -1788,7 +1824,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>farsz bez cebuli, podawaj bez okrasy – z jogurtem 2%</p></div>
  </footer>
 </article>
-<article class="rc" id="p37" data-season="lato" data-diff="2" data-rate="5" data-time="45" data-kcal="660" data-prot="39" data-diet="Z" data-veg="0" data-alg="gluten ryby sezam soja" data-text="łosoś teriyaki z fasolką i ryżem 2 kawałki łososia 150 g ryżu jaśminowego 225 ml wody 200 g fasolki 3 łyżki sosu sojowego 1 łyżka miodu 1 łyżeczka startego imbiru sezam łosoś ↔ kurczak w paskach (14 min); fasolka ↔ brokuł">
+<article class="rc" id="p37" data-season="lato" data-diff="2" data-rate="5" data-time="45" data-kcal="660" data-prot="39" data-diet="Z" data-veg="0" data-alg="gluten ryby sezam soja" data-ing="2 kawałki łososia 150 g ryżu jaśminowego 225 ml wody 200 g fasolki 3 łyżki sosu sojowego 1 łyżka miodu 1 łyżeczka startego imbiru sezam" data-text="łosoś teriyaki z fasolką i ryżem 2 kawałki łososia 150 g ryżu jaśminowego 225 ml wody 200 g fasolki 3 łyżki sosu sojowego 1 łyżka miodu 1 łyżeczka startego imbiru sezam łosoś ↔ kurczak w paskach (14 min); fasolka ↔ brokuł">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>037</div>
   <div class="rc-title">
@@ -1822,7 +1858,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>zamiast sosu sojowego: imbir, odrobina miodu i woda; bez sezamu</p></div>
  </footer>
 </article>
-<article class="rc" id="p38" data-season="lato" data-diff="2" data-rate="4" data-time="32" data-kcal="130" data-prot="4" data-diet="N" data-veg="1" data-alg="" data-text="ratatouille z parowaru 1 bakłażan 1 cukinia 1 papryka 1 cebula 400 g pomidorów z puszki 2 ząbki czosnku tymianek, oliwa, sól bakłażan ↔ dynia (13 min); cukinia ↔ patison">
+<article class="rc" id="p38" data-season="lato" data-diff="2" data-rate="4" data-time="32" data-kcal="130" data-prot="4" data-diet="N" data-veg="1" data-alg="" data-ing="1 bakłażan 1 cukinia 1 papryka 1 cebula 400 g pomidorów z puszki 2 ząbki czosnku tymianek, oliwa, sól" data-text="ratatouille z parowaru 1 bakłażan 1 cukinia 1 papryka 1 cebula 400 g pomidorów z puszki 2 ząbki czosnku tymianek, oliwa, sól bakłażan ↔ dynia (13 min); cukinia ↔ patison">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>038</div>
   <div class="rc-title">
@@ -1856,7 +1892,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p39" data-season="lato" data-diff="2" data-rate="5" data-time="40" data-kcal="350" data-prot="8" data-diet="N" data-veg="1" data-alg="mleko" data-text="kurki z młodymi ziemniakami 300 g kurek 500 g młodych ziemniaków 1 cebula 15 g masła 2 łyżki śmietany koperek, sól, pieprz kurki ↔ pieczarki w ćwiartkach (8 min)">
+<article class="rc" id="p39" data-season="lato" data-diff="2" data-rate="5" data-time="40" data-kcal="350" data-prot="8" data-diet="N" data-veg="1" data-alg="mleko" data-ing="300 g kurek 500 g młodych ziemniaków 1 cebula 15 g masła 2 łyżki śmietany koperek, sól, pieprz" data-text="kurki z młodymi ziemniakami 300 g kurek 500 g młodych ziemniaków 1 cebula 15 g masła 2 łyżki śmietany koperek, sól, pieprz kurki ↔ pieczarki w ćwiartkach (8 min)">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>039</div>
   <div class="rc-title">
@@ -1890,7 +1926,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p40" data-season="lato" data-diff="2" data-rate="4" data-time="35" data-kcal="280" data-prot="49" data-diet="T" data-veg="0" data-alg="" data-text="indyk z brzoskwinią i rozmarynem 400 g polędwiczki z indyka 2 brzoskwinie 1 gałązka rozmarynu 1 łyżeczka miodu sól, pieprz brzoskwinia ↔ nektarynka, morela, jabłko (10 min)">
+<article class="rc" id="p40" data-season="lato" data-diff="2" data-rate="4" data-time="35" data-kcal="280" data-prot="49" data-diet="T" data-veg="0" data-alg="" data-ing="400 g polędwiczki z indyka 2 brzoskwinie 1 gałązka rozmarynu 1 łyżeczka miodu sól, pieprz" data-text="indyk z brzoskwinią i rozmarynem 400 g polędwiczki z indyka 2 brzoskwinie 1 gałązka rozmarynu 1 łyżeczka miodu sól, pieprz brzoskwinia ↔ nektarynka, morela, jabłko (10 min)">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>040</div>
   <div class="rc-title">
@@ -1924,7 +1960,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p41" data-season="lato" data-diff="1" data-rate="4" data-time="28" data-kcal="280" data-prot="12" data-diet="N" data-veg="1" data-alg="jaja gorczyca siarczyny" data-text="sałatka z fasolki, ziemniaków i jajka 400 g ziemniaków 300 g fasolki 3 jajka 1 czerwona cebula 2 łyżki oliwy 1 łyżka octu winnego 1 łyżeczka musztardy natka fasolka ↔ brokuł, groszek; ziemniaki ↔ batat">
+<article class="rc" id="p41" data-season="lato" data-diff="1" data-rate="4" data-time="28" data-kcal="280" data-prot="12" data-diet="N" data-veg="1" data-alg="jaja gorczyca siarczyny" data-ing="400 g ziemniaków 300 g fasolki 3 jajka 1 czerwona cebula 2 łyżki oliwy 1 łyżka octu winnego 1 łyżeczka musztardy natka" data-text="sałatka z fasolki, ziemniaków i jajka 400 g ziemniaków 300 g fasolki 3 jajka 1 czerwona cebula 2 łyżki oliwy 1 łyżka octu winnego 1 łyżeczka musztardy natka fasolka ↔ brokuł, groszek; ziemniaki ↔ batat">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>041</div>
   <div class="rc-title">
@@ -1958,7 +1994,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p42" data-season="lato" data-diff="1" data-rate="4" data-time="14" data-kcal="90" data-prot="5" data-diet="N" data-veg="1" data-alg="gluten sezam soja" data-text="brokuł z sezamem i sosem sojowym 1 brokuł 1 łyżka sosu sojowego 1 łyżeczka oleju sezamowego lub rzepakowego 1 łyżka sezamu 1 ząbek czosnku brokuł ↔ fasolka, brukselka (+5 min)">
+<article class="rc" id="p42" data-season="lato" data-diff="1" data-rate="4" data-time="14" data-kcal="90" data-prot="5" data-diet="N" data-veg="1" data-alg="gluten sezam soja" data-ing="1 brokuł 1 łyżka sosu sojowego 1 łyżeczka oleju sezamowego lub rzepakowego 1 łyżka sezamu 1 ząbek czosnku" data-text="brokuł z sezamem i sosem sojowym 1 brokuł 1 łyżka sosu sojowego 1 łyżeczka oleju sezamowego lub rzepakowego 1 łyżka sezamu 1 ząbek czosnku brokuł ↔ fasolka, brukselka (+5 min)">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>042</div>
   <div class="rc-title">
@@ -1992,7 +2028,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p43" data-season="lato" data-diff="3" data-rate="5" data-time="70" data-kcal="260" data-prot="23" data-diet="N" data-veg="0" data-alg="" data-text="gołąbki z młodej kapusty z indykiem 1 główka młodej kapusty 400 g mielonego indyka 100 g ugotowanego ryżu 1 cebula majeranek, sól, pieprz 400 g przecieru pomidorowego kapusta biała ↔ włoska (miększa), liście botwiny">
+<article class="rc" id="p43" data-season="lato" data-diff="3" data-rate="5" data-time="70" data-kcal="260" data-prot="23" data-diet="N" data-veg="0" data-alg="" data-ing="1 główka młodej kapusty 400 g mielonego indyka 100 g ugotowanego ryżu 1 cebula majeranek, sól, pieprz 400 g przecieru pomidorowego" data-text="gołąbki z młodej kapusty z indykiem 1 główka młodej kapusty 400 g mielonego indyka 100 g ugotowanego ryżu 1 cebula majeranek, sól, pieprz 400 g przecieru pomidorowego kapusta biała ↔ włoska (miększa), liście botwiny">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>043</div>
   <div class="rc-title">
@@ -2026,7 +2062,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p44" data-season="lato" data-diff="1" data-rate="4" data-time="50" data-kcal="380" data-prot="13" data-diet="N" data-veg="1" data-alg="gluten jaja soja" data-text="ryż z warzywami po azjatycku 200 g ryżu 300 ml wody 1 marchew 1 papryka 100 g groszku 2 jajka 2 łyżki sosu sojowego dymka groszek ↔ kukurydza; papryka ↔ cukinia">
+<article class="rc" id="p44" data-season="lato" data-diff="1" data-rate="4" data-time="50" data-kcal="380" data-prot="13" data-diet="N" data-veg="1" data-alg="gluten jaja soja" data-ing="200 g ryżu 300 ml wody 1 marchew 1 papryka 100 g groszku 2 jajka 2 łyżki sosu sojowego dymka" data-text="ryż z warzywami po azjatycku 200 g ryżu 300 ml wody 1 marchew 1 papryka 100 g groszku 2 jajka 2 łyżki sosu sojowego dymka groszek ↔ kukurydza; papryka ↔ cukinia">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>044</div>
   <div class="rc-title">
@@ -2060,7 +2096,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p45" data-season="lato" data-diff="2" data-rate="4" data-time="41" data-kcal="210" data-prot="22" data-diet="Z" data-veg="0" data-alg="gluten jaja" data-text="klopsiki z cukinią w sosie pomidorowym 400 g mięsa mielonego (drób lub wieprzowe chude) 1 mała cukinia starta i odciśnięta 1 jajko 2 łyżki bułki tartej 400 g pomidorów krojonych czosnek, bazylia, sól cukinia ↔ marchew starta; drób ↔ indyk">
+<article class="rc" id="p45" data-season="lato" data-diff="2" data-rate="4" data-time="41" data-kcal="210" data-prot="22" data-diet="Z" data-veg="0" data-alg="gluten jaja" data-ing="400 g mięsa mielonego (drób lub wieprzowe chude) 1 mała cukinia starta i odciśnięta 1 jajko 2 łyżki bułki tartej 400 g pomidorów krojonych czosnek, bazylia, sól" data-text="klopsiki z cukinią w sosie pomidorowym 400 g mięsa mielonego (drób lub wieprzowe chude) 1 mała cukinia starta i odciśnięta 1 jajko 2 łyżki bułki tartej 400 g pomidorów krojonych czosnek, bazylia, sól cukinia ↔ marchew starta; drób ↔ indyk">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>045</div>
   <div class="rc-title">
@@ -2094,7 +2130,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>mięso drobiowe, sos z przecieru bez czosnku</p></div>
  </footer>
 </article>
-<article class="rc" id="p46" data-season="lato" data-diff="1" data-rate="3" data-time="23" data-kcal="240" data-prot="26" data-diet="Z" data-veg="1" data-alg="mleko jaja" data-text="pomidory faszerowane twarożkiem i ziołami 4 duże pomidory 200 g twarogu 1 jajko szczypior, bazylia 2 łyżki tartego parmezanu lub sera żółtego sól, pieprz pomidor ↔ papryka (15 min), cukinia">
+<article class="rc" id="p46" data-season="lato" data-diff="1" data-rate="3" data-time="23" data-kcal="240" data-prot="26" data-diet="Z" data-veg="1" data-alg="mleko jaja" data-ing="4 duże pomidory 200 g twarogu 1 jajko szczypior, bazylia 2 łyżki tartego parmezanu lub sera żółtego sól, pieprz" data-text="pomidory faszerowane twarożkiem i ziołami 4 duże pomidory 200 g twarogu 1 jajko szczypior, bazylia 2 łyżki tartego parmezanu lub sera żółtego sól, pieprz pomidor ↔ papryka (15 min), cukinia">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>046</div>
   <div class="rc-title">
@@ -2128,7 +2164,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>pomidory sparz i obierz, bez parmezanu, koperek zamiast szczypioru</p></div>
  </footer>
 </article>
-<article class="rc" id="p47" data-season="lato" data-diff="1" data-rate="5" data-time="32" data-kcal="400" data-prot="56" data-diet="Z" data-veg="0" data-alg="" data-text="kurczak z cytryną i zielonymi warzywami 4 udka z kurczaka bez kości i skóry 1 cytryna 1 brokuł 150 g groszku cukrowego 1 łyżeczka ziół prowansalskich sól, pieprz udka ↔ pierś (−4 min); groszek cukrowy ↔ fasolka">
+<article class="rc" id="p47" data-season="lato" data-diff="1" data-rate="5" data-time="32" data-kcal="400" data-prot="56" data-diet="Z" data-veg="0" data-alg="" data-ing="4 udka z kurczaka bez kości i skóry 1 cytryna 1 brokuł 150 g groszku cukrowego 1 łyżeczka ziół prowansalskich sól, pieprz" data-text="kurczak z cytryną i zielonymi warzywami 4 udka z kurczaka bez kości i skóry 1 cytryna 1 brokuł 150 g groszku cukrowego 1 łyżeczka ziół prowansalskich sól, pieprz udka ↔ pierś (−4 min); groszek cukrowy ↔ fasolka">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>047</div>
   <div class="rc-title">
@@ -2162,7 +2198,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>pierś zamiast udek, bez cytryny – tymianek</p></div>
  </footer>
 </article>
-<article class="rc" id="p48" data-season="lato" data-diff="1" data-rate="4" data-time="25" data-kcal="160" data-prot="13" data-diet="N" data-veg="1" data-alg="mleko" data-text="pieczarki faszerowane serem i szpinakiem 8 dużych pieczarek 100 g szpinaku 80 g sera feta lub twarogu 1 ząbek czosnku pieprz szpinak ↔ jarmuż; feta ↔ ser żółty">
+<article class="rc" id="p48" data-season="lato" data-diff="1" data-rate="4" data-time="25" data-kcal="160" data-prot="13" data-diet="N" data-veg="1" data-alg="mleko" data-ing="8 dużych pieczarek 100 g szpinaku 80 g sera feta lub twarogu 1 ząbek czosnku pieprz" data-text="pieczarki faszerowane serem i szpinakiem 8 dużych pieczarek 100 g szpinaku 80 g sera feta lub twarogu 1 ząbek czosnku pieprz szpinak ↔ jarmuż; feta ↔ ser żółty">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>048</div>
   <div class="rc-title">
@@ -2196,7 +2232,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p49" data-season="lato" data-diff="2" data-rate="3" data-time="30" data-kcal="260" data-prot="17" data-diet="Z" data-veg="1" data-alg="gluten mleko jaja" data-text="placuszki z cukinii na parze 1 cukinia starta i odciśnięta 2 jajka 4 łyżki mąki 1 łyżeczka proszku do pieczenia 50 g sera żółtego koperek, sól cukinia ↔ marchew starta, ziemniak starty (+5 min)">
+<article class="rc" id="p49" data-season="lato" data-diff="2" data-rate="3" data-time="30" data-kcal="260" data-prot="17" data-diet="Z" data-veg="1" data-alg="gluten mleko jaja" data-ing="1 cukinia starta i odciśnięta 2 jajka 4 łyżki mąki 1 łyżeczka proszku do pieczenia 50 g sera żółtego koperek, sól" data-text="placuszki z cukinii na parze 1 cukinia starta i odciśnięta 2 jajka 4 łyżki mąki 1 łyżeczka proszku do pieczenia 50 g sera żółtego koperek, sól cukinia ↔ marchew starta, ziemniak starty (+5 min)">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>049</div>
   <div class="rc-title">
@@ -2230,7 +2266,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez sera żółtego (ewentualnie mozzarella light), cukinia obrana</p></div>
  </footer>
 </article>
-<article class="rc" id="p50" data-season="lato" data-diff="3" data-rate="5" data-time="105" data-kcal="670" data-prot="20" data-diet="T" data-veg="1" data-alg="gluten mleko jaja" data-text="pyzy drożdżowe z jagodami 500 g mąki 25 g świeżych drożdży 250 ml ciepłego mleka 1 jajko 2 łyżki cukru 40 g masła 400 g jagód jogurt lub śmietana, cukier puder jagody ↔ truskawki, śliwki, jabłko z cynamonem">
+<article class="rc" id="p50" data-season="lato" data-diff="3" data-rate="5" data-time="105" data-kcal="670" data-prot="20" data-diet="T" data-veg="1" data-alg="gluten mleko jaja" data-ing="500 g mąki 25 g świeżych drożdży 250 ml ciepłego mleka 1 jajko 2 łyżki cukru 40 g masła 400 g jagód jogurt lub śmietana, cukier puder" data-text="pyzy drożdżowe z jagodami 500 g mąki 25 g świeżych drożdży 250 ml ciepłego mleka 1 jajko 2 łyżki cukru 40 g masła 400 g jagód jogurt lub śmietana, cukier puder jagody ↔ truskawki, śliwki, jabłko z cynamonem">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>050</div>
   <div class="rc-title">
@@ -2264,7 +2300,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p51" data-season="lato" data-diff="1" data-rate="4" data-time="10" data-kcal="230" data-prot="7" data-diet="Z" data-veg="1" data-alg="gluten mleko orzechy" data-text="morele z jogurtem i miodem 8 moreli 400 g jogurtu greckiego 2 łyżki miodu garść płatków migdałów lub owsianych morele ↔ brzoskwinie, śliwki, gruszki (10 min)">
+<article class="rc" id="p51" data-season="lato" data-diff="1" data-rate="4" data-time="10" data-kcal="230" data-prot="7" data-diet="Z" data-veg="1" data-alg="gluten mleko orzechy" data-ing="8 moreli 400 g jogurtu greckiego 2 łyżki miodu garść płatków migdałów lub owsianych" data-text="morele z jogurtem i miodem 8 moreli 400 g jogurtu greckiego 2 łyżki miodu garść płatków migdałów lub owsianych morele ↔ brzoskwinie, śliwki, gruszki (10 min)">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>051</div>
   <div class="rc-title">
@@ -2298,7 +2334,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>jogurt naturalny 2% lub skyr, bez migdałów</p></div>
  </footer>
 </article>
-<article class="rc" id="p52" data-season="lato" data-diff="2" data-rate="4" data-time="40" data-kcal="220" data-prot="28" data-diet="N" data-veg="0" data-alg="ryby seler" data-text="ryba po grecku z pary 600 g filetów mintaja lub morszczuka 3 marchewki 1 pietruszka ¼ selera 1 cebula 200 ml przecieru liść laurowy, ziele angielskie, sól, cukier mintaj ↔ dorsz, morszczuk; seler ↔ pietruszka">
+<article class="rc" id="p52" data-season="lato" data-diff="2" data-rate="4" data-time="40" data-kcal="220" data-prot="28" data-diet="N" data-veg="0" data-alg="ryby seler" data-ing="600 g filetów mintaja lub morszczuka 3 marchewki 1 pietruszka ¼ selera 1 cebula 200 ml przecieru liść laurowy, ziele angielskie, sól, cukier" data-text="ryba po grecku z pary 600 g filetów mintaja lub morszczuka 3 marchewki 1 pietruszka ¼ selera 1 cebula 200 ml przecieru liść laurowy, ziele angielskie, sól, cukier mintaj ↔ dorsz, morszczuk; seler ↔ pietruszka">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>052</div>
   <div class="rc-title">
@@ -2332,7 +2368,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p53" data-season="lato" data-diff="2" data-rate="4" data-time="45" data-kcal="260" data-prot="17" data-diet="N" data-veg="0" data-alg="" data-text="papryka z ryżem i mięsem 4 papryki 300 g mielonego mięsa 100 g ryżu ugotowanego 1 cebula majeranek, papryka słodka, sól 300 g przecieru pomidorowego papryka ↔ cukinia, pomidor (krócej); mięso ↔ soczewica ugotowana">
+<article class="rc" id="p53" data-season="lato" data-diff="2" data-rate="4" data-time="45" data-kcal="260" data-prot="17" data-diet="N" data-veg="0" data-alg="" data-ing="4 papryki 300 g mielonego mięsa 100 g ryżu ugotowanego 1 cebula majeranek, papryka słodka, sól 300 g przecieru pomidorowego" data-text="papryka z ryżem i mięsem 4 papryki 300 g mielonego mięsa 100 g ryżu ugotowanego 1 cebula majeranek, papryka słodka, sól 300 g przecieru pomidorowego papryka ↔ cukinia, pomidor (krócej); mięso ↔ soczewica ugotowana">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>053</div>
   <div class="rc-title">
@@ -2366,7 +2402,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p54" data-season="lato" data-diff="1" data-rate="4" data-time="27" data-kcal="340" data-prot="20" data-diet="N" data-veg="1" data-alg="gluten mleko jaja" data-text="zielona miska z kaszą, jajkiem i warzywami 100 g bulguru 150 ml wody 2 jajka ½ brokuła 100 g fasolki 1 ogórek rzodkiewki sos jogurtowo-ziołowy bulgur ↔ kasza jaglana, kuskus; brokuł ↔ kalafior">
+<article class="rc" id="p54" data-season="lato" data-diff="1" data-rate="4" data-time="27" data-kcal="340" data-prot="20" data-diet="N" data-veg="1" data-alg="gluten mleko jaja" data-ing="100 g bulguru 150 ml wody 2 jajka ½ brokuła 100 g fasolki 1 ogórek rzodkiewki sos jogurtowo-ziołowy" data-text="zielona miska z kaszą, jajkiem i warzywami 100 g bulguru 150 ml wody 2 jajka ½ brokuła 100 g fasolki 1 ogórek rzodkiewki sos jogurtowo-ziołowy bulgur ↔ kasza jaglana, kuskus; brokuł ↔ kalafior">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>054</div>
   <div class="rc-title">
@@ -2400,7 +2436,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p55" data-season="lato" data-diff="2" data-rate="4" data-time="35" data-kcal="210" data-prot="36" data-diet="Z" data-veg="0" data-alg="mleko" data-text="szaszłyki drobiowe z warzywami 600 g piersi z kurczaka 1 cukinia 1 papryka 1 cebula czerwona 2 łyżki jogurtu 1 łyżeczka curry sól patyczki kurczak ↔ indyk; cukinia ↔ pieczarki">
+<article class="rc" id="p55" data-season="lato" data-diff="2" data-rate="4" data-time="35" data-kcal="210" data-prot="36" data-diet="Z" data-veg="0" data-alg="mleko" data-ing="600 g piersi z kurczaka 1 cukinia 1 papryka 1 cebula czerwona 2 łyżki jogurtu 1 łyżeczka curry sól patyczki" data-text="szaszłyki drobiowe z warzywami 600 g piersi z kurczaka 1 cukinia 1 papryka 1 cebula czerwona 2 łyżki jogurtu 1 łyżeczka curry sól patyczki kurczak ↔ indyk; cukinia ↔ pieczarki">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>055</div>
   <div class="rc-title">
@@ -2434,7 +2470,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez cebuli i papryki (sam kurczak z cukinią), zioła zamiast curry, bez patelni</p></div>
  </footer>
 </article>
-<article class="rc" id="p56" data-season="lato" data-diff="1" data-rate="4" data-time="33" data-kcal="330" data-prot="33" data-diet="Z" data-veg="0" data-alg="gluten mleko ryby" data-text="dorsz w sosie koperkowym z marchewką 600 g dorsza 600 g ziemniaków 3 marchewki 200 ml mleka 1 łyżka mąki 15 g masła koperek, sól dorsz ↔ mintaj; marchew ↔ kalarepa">
+<article class="rc" id="p56" data-season="lato" data-diff="1" data-rate="4" data-time="33" data-kcal="330" data-prot="33" data-diet="Z" data-veg="0" data-alg="gluten mleko ryby" data-ing="600 g dorsza 600 g ziemniaków 3 marchewki 200 ml mleka 1 łyżka mąki 15 g masła koperek, sól" data-text="dorsz w sosie koperkowym z marchewką 600 g dorsza 600 g ziemniaków 3 marchewki 200 ml mleka 1 łyżka mąki 15 g masła koperek, sól dorsz ↔ mintaj; marchew ↔ kalarepa">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>056</div>
   <div class="rc-title">
@@ -2468,7 +2504,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>sos bez zasmażki: mąkę rozmieszaj w zimnym mleku 2% i zagotuj</p></div>
  </footer>
 </article>
-<article class="rc" id="p57" data-season="lato" data-diff="1" data-rate="4" data-time="15" data-kcal="220" data-prot="5" data-diet="Z" data-veg="1" data-alg="orzechy" data-text="gruszki z cynamonem i serkiem 2 gruszki szczypta cynamonu 2 łyżki serka homogenizowanego 1 łyżka miodu orzechy gruszka ↔ jabłko, pigwa (20 min)">
+<article class="rc" id="p57" data-season="lato" data-diff="1" data-rate="4" data-time="15" data-kcal="220" data-prot="5" data-diet="Z" data-veg="1" data-alg="orzechy" data-ing="2 gruszki szczypta cynamonu 2 łyżki serka homogenizowanego 1 łyżka miodu orzechy" data-text="gruszki z cynamonem i serkiem 2 gruszki szczypta cynamonu 2 łyżki serka homogenizowanego 1 łyżka miodu orzechy gruszka ↔ jabłko, pigwa (20 min)">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>057</div>
   <div class="rc-title">
@@ -2502,7 +2538,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez orzechów; gruszki są w zaleceniach na obu listach – sprawdź tolerancję</p></div>
  </footer>
 </article>
-<article class="rc" id="p58" data-season="lato" data-diff="1" data-rate="4" data-time="25" data-kcal="170" data-prot="11" data-diet="N" data-veg="0" data-alg="" data-text="leczo z pary z kiełbasą drobiową 2 papryki 1 cukinia 1 cebula 200 g kiełbasy drobiowej 400 g pomidorów krojonych papryka słodka, sól kiełbasa ↔ fasola z puszki (wersja bez mięsa)">
+<article class="rc" id="p58" data-season="lato" data-diff="1" data-rate="4" data-time="25" data-kcal="170" data-prot="11" data-diet="N" data-veg="0" data-alg="" data-ing="2 papryki 1 cukinia 1 cebula 200 g kiełbasy drobiowej 400 g pomidorów krojonych papryka słodka, sól" data-text="leczo z pary z kiełbasą drobiową 2 papryki 1 cukinia 1 cebula 200 g kiełbasy drobiowej 400 g pomidorów krojonych papryka słodka, sól kiełbasa ↔ fasola z puszki (wersja bez mięsa)">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>058</div>
   <div class="rc-title">
@@ -2536,7 +2572,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p59" data-season="lato" data-diff="1" data-rate="4" data-time="45" data-kcal="480" data-prot="50" data-diet="T" data-veg="0" data-alg="mleko" data-text="kurczak z cukinią, ryżem i sosem koperkowym 2 piersi z kurczaka (ok. 350 g) 120 g ryżu białego 180 ml wody 1 cukinia 150 g jogurtu naturalnego 2% koperek, tymianek, sól cukinia ↔ kabaczek, patison; ryż ↔ kuskus">
+<article class="rc" id="p59" data-season="lato" data-diff="1" data-rate="4" data-time="45" data-kcal="480" data-prot="50" data-diet="T" data-veg="0" data-alg="mleko" data-ing="2 piersi z kurczaka (ok. 350 g) 120 g ryżu białego 180 ml wody 1 cukinia 150 g jogurtu naturalnego 2% koperek, tymianek, sól" data-text="kurczak z cukinią, ryżem i sosem koperkowym 2 piersi z kurczaka (ok. 350 g) 120 g ryżu białego 180 ml wody 1 cukinia 150 g jogurtu naturalnego 2% koperek, tymianek, sól cukinia ↔ kabaczek, patison; ryż ↔ kuskus">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>059</div>
   <div class="rc-title">
@@ -2570,7 +2606,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p60" data-season="lato" data-diff="1" data-rate="4" data-time="28" data-kcal="330" data-prot="33" data-diet="T" data-veg="0" data-alg="mleko ryby" data-text="morszczuk z puree z cukinii i ziemniaka 300 g filetu z morszczuka 400 g ziemniaków 1 mała cukinia 10 g masła bazylia, sól morszczuk ↔ dorsz, mintaj, sola">
+<article class="rc" id="p60" data-season="lato" data-diff="1" data-rate="4" data-time="28" data-kcal="330" data-prot="33" data-diet="T" data-veg="0" data-alg="mleko ryby" data-ing="300 g filetu z morszczuka 400 g ziemniaków 1 mała cukinia 10 g masła bazylia, sól" data-text="morszczuk z puree z cukinii i ziemniaka 300 g filetu z morszczuka 400 g ziemniaków 1 mała cukinia 10 g masła bazylia, sól morszczuk ↔ dorsz, mintaj, sola">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>060</div>
   <div class="rc-title">
@@ -2604,7 +2640,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p61" data-season="lato" data-diff="1" data-rate="4" data-time="50" data-kcal="260" data-prot="8" data-diet="T" data-veg="1" data-alg="mleko" data-text="ryż na mleku z przetartymi jagodami 100 g ryżu białego 500 ml mleka 2% szczypta wanilii 250 g jagód 1 łyżeczka miodu (opcjonalnie) jagody ↔ borówki, morele, brzoskwinie">
+<article class="rc" id="p61" data-season="lato" data-diff="1" data-rate="4" data-time="50" data-kcal="260" data-prot="8" data-diet="T" data-veg="1" data-alg="mleko" data-ing="100 g ryżu białego 500 ml mleka 2% szczypta wanilii 250 g jagód 1 łyżeczka miodu (opcjonalnie)" data-text="ryż na mleku z przetartymi jagodami 100 g ryżu białego 500 ml mleka 2% szczypta wanilii 250 g jagód 1 łyżeczka miodu (opcjonalnie) jagody ↔ borówki, morele, brzoskwinie">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>061</div>
   <div class="rc-title">
@@ -2638,7 +2674,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p62" data-season="lato" data-diff="1" data-rate="4" data-time="15" data-kcal="200" data-prot="8" data-diet="T" data-veg="1" data-alg="gluten mleko" data-text="mus brzoskwiniowy z jogurtem i biszkoptami 3 dojrzałe brzoskwinie 200 g jogurtu naturalnego 2% lub skyru 4 biszkopty szczypta cynamonu brzoskwinie ↔ morele, mango, jabłko (10 min)">
+<article class="rc" id="p62" data-season="lato" data-diff="1" data-rate="4" data-time="15" data-kcal="200" data-prot="8" data-diet="T" data-veg="1" data-alg="gluten mleko" data-ing="3 dojrzałe brzoskwinie 200 g jogurtu naturalnego 2% lub skyru 4 biszkopty szczypta cynamonu" data-text="mus brzoskwiniowy z jogurtem i biszkoptami 3 dojrzałe brzoskwinie 200 g jogurtu naturalnego 2% lub skyru 4 biszkopty szczypta cynamonu brzoskwinie ↔ morele, mango, jabłko (10 min)">
  <header class="rc-head">
   <div class="rc-no" title="Lato"><span>L</span>062</div>
   <div class="rc-title">
@@ -2695,7 +2731,7 @@ body.searching .rc.open .rc-desc{display:block}
   </div>
  </div>
  <div class="recipes">
-<article class="rc" id="p63" data-season="jesien" data-diff="1" data-rate="5" data-time="23" data-kcal="200" data-prot="8" data-diet="Z" data-veg="1" data-alg="mleko" data-text="dynia z tymiankiem i fetą 1 kg dyni (hokkaido lub piżmowa) 100 g sera feta 1 łyżeczka tymianku garść pestek dyni 1 łyżka oliwy sól, pieprz dynia ↔ batat (−2 min), marchew (+2 min)">
+<article class="rc" id="p63" data-season="jesien" data-diff="1" data-rate="5" data-time="23" data-kcal="200" data-prot="8" data-diet="Z" data-veg="1" data-alg="mleko" data-ing="1 kg dyni (hokkaido lub piżmowa) 100 g sera feta 1 łyżeczka tymianku garść pestek dyni 1 łyżka oliwy sól, pieprz" data-text="dynia z tymiankiem i fetą 1 kg dyni (hokkaido lub piżmowa) 100 g sera feta 1 łyżeczka tymianku garść pestek dyni 1 łyżka oliwy sól, pieprz dynia ↔ batat (−2 min), marchew (+2 min)">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>063</div>
   <div class="rc-title">
@@ -2729,7 +2765,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>twarożek półtłusty zamiast fety, bez pestek</p></div>
  </footer>
 </article>
-<article class="rc" id="p64" data-season="jesien" data-diff="1" data-rate="5" data-time="25" data-kcal="180" data-prot="5" data-diet="Z" data-veg="1" data-alg="mleko" data-text="krem z dyni z imbirem 800 g dyni 2 marchewki 1 cebula 1 cm imbiru 800 ml bulionu 100 ml mleka kokosowego lub śmietanki pestki dyni dynia ↔ batat, marchew; mleko kokosowe ↔ jogurt">
+<article class="rc" id="p64" data-season="jesien" data-diff="1" data-rate="5" data-time="25" data-kcal="180" data-prot="5" data-diet="Z" data-veg="1" data-alg="mleko" data-ing="800 g dyni 2 marchewki 1 cebula 1 cm imbiru 800 ml bulionu 100 ml mleka kokosowego lub śmietanki pestki dyni" data-text="krem z dyni z imbirem 800 g dyni 2 marchewki 1 cebula 1 cm imbiru 800 ml bulionu 100 ml mleka kokosowego lub śmietanki pestki dyni dynia ↔ batat, marchew; mleko kokosowe ↔ jogurt">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>064</div>
   <div class="rc-title">
@@ -2763,7 +2799,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez cebuli, mleko 2% zamiast kokosowego, bez pestek</p></div>
  </footer>
 </article>
-<article class="rc" id="p65" data-season="jesien" data-diff="1" data-rate="4" data-time="22" data-kcal="140" data-prot="6" data-diet="N" data-veg="0" data-alg="" data-text="brukselka z boczkiem i jabłkiem 500 g brukselki 50 g boczku wędzonego 1 jabłko 1 łyżeczka miodu sól, pieprz brukselka ↔ brokuł, kapusta w paskach; boczek ↔ orzechy (wersja bez mięsa)">
+<article class="rc" id="p65" data-season="jesien" data-diff="1" data-rate="4" data-time="22" data-kcal="140" data-prot="6" data-diet="N" data-veg="0" data-alg="" data-ing="500 g brukselki 50 g boczku wędzonego 1 jabłko 1 łyżeczka miodu sól, pieprz" data-text="brukselka z boczkiem i jabłkiem 500 g brukselki 50 g boczku wędzonego 1 jabłko 1 łyżeczka miodu sól, pieprz brukselka ↔ brokuł, kapusta w paskach; boczek ↔ orzechy (wersja bez mięsa)">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>065</div>
   <div class="rc-title">
@@ -2797,7 +2833,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p66" data-season="jesien" data-diff="1" data-rate="4" data-time="35" data-kcal="70" data-prot="2" data-diet="Z" data-veg="1" data-alg="" data-text="buraki z chrzanem na ciepło 4 średnie buraki 2 łyżki chrzanu 1 łyżka octu jabłkowego 1 łyżeczka cukru sól buraki ↔ seler w kostce (20 min), marchew">
+<article class="rc" id="p66" data-season="jesien" data-diff="1" data-rate="4" data-time="35" data-kcal="70" data-prot="2" data-diet="Z" data-veg="1" data-alg="" data-ing="4 średnie buraki 2 łyżki chrzanu 1 łyżka octu jabłkowego 1 łyżeczka cukru sól" data-text="buraki z chrzanem na ciepło 4 średnie buraki 2 łyżki chrzanu 1 łyżka octu jabłkowego 1 łyżeczka cukru sól buraki ↔ seler w kostce (20 min), marchew">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>066</div>
   <div class="rc-title">
@@ -2831,7 +2867,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez chrzanu i octu – z jogurtem 2% i koperkiem</p></div>
  </footer>
 </article>
-<article class="rc" id="p67" data-season="jesien" data-diff="2" data-rate="5" data-time="50" data-kcal="410" data-prot="35" data-diet="Z" data-veg="0" data-alg="" data-text="kurczak z dynią i ryżem curry 500 g piersi z kurczaka 400 g dyni 200 g ryżu 300 ml wody 400 g pomidorów krojonych 1 cebula 2 łyżeczki curry kolendra lub natka dynia ↔ batat, ziemniak; kurczak ↔ ciecierzyca z puszki (5 min)">
+<article class="rc" id="p67" data-season="jesien" data-diff="2" data-rate="5" data-time="50" data-kcal="410" data-prot="35" data-diet="Z" data-veg="0" data-alg="" data-ing="500 g piersi z kurczaka 400 g dyni 200 g ryżu 300 ml wody 400 g pomidorów krojonych 1 cebula 2 łyżeczki curry kolendra lub natka" data-text="kurczak z dynią i ryżem curry 500 g piersi z kurczaka 400 g dyni 200 g ryżu 300 ml wody 400 g pomidorów krojonych 1 cebula 2 łyżeczki curry kolendra lub natka dynia ↔ batat, ziemniak; kurczak ↔ ciecierzyca z puszki (5 min)">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>067</div>
   <div class="rc-title">
@@ -2865,7 +2901,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>zamiast curry imbir i kurkuma, sos z przecieru bez obsmażania cebuli</p></div>
  </footer>
 </article>
-<article class="rc" id="p68" data-season="jesien" data-diff="1" data-rate="4" data-time="20" data-kcal="300" data-prot="32" data-diet="N" data-veg="0" data-alg="mleko ryby gorczyca" data-text="pstrąg z porem w śmietanie 2 filety pstrąga 1 por (biała część) 3 łyżki śmietany 12% 1 łyżeczka musztardy cytryna, sól, pieprz por ↔ cebula dymka, fenkuł (12 min)">
+<article class="rc" id="p68" data-season="jesien" data-diff="1" data-rate="4" data-time="20" data-kcal="300" data-prot="32" data-diet="N" data-veg="0" data-alg="mleko ryby gorczyca" data-ing="2 filety pstrąga 1 por (biała część) 3 łyżki śmietany 12% 1 łyżeczka musztardy cytryna, sól, pieprz" data-text="pstrąg z porem w śmietanie 2 filety pstrąga 1 por (biała część) 3 łyżki śmietany 12% 1 łyżeczka musztardy cytryna, sól, pieprz por ↔ cebula dymka, fenkuł (12 min)">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>068</div>
   <div class="rc-title">
@@ -2899,7 +2935,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p69" data-season="jesien" data-diff="3" data-rate="4" data-time="65" data-kcal="180" data-prot="8" data-diet="N" data-veg="1" data-alg="" data-text="gołąbki z kaszą i grzybami 1 główka kapusty 200 g kaszy gryczanej ugotowanej 300 g pieczarek 1 cebula garść suszonych grzybów (namoczonych) majeranek, sól, pieprz sos grzybowy lub pomidorowy gryczana ↔ pęczak, ryż; pieczarki ↔ boczniaki">
+<article class="rc" id="p69" data-season="jesien" data-diff="3" data-rate="4" data-time="65" data-kcal="180" data-prot="8" data-diet="N" data-veg="1" data-alg="" data-ing="1 główka kapusty 200 g kaszy gryczanej ugotowanej 300 g pieczarek 1 cebula garść suszonych grzybów (namoczonych) majeranek, sól, pieprz sos grzybowy lub pomidorowy" data-text="gołąbki z kaszą i grzybami 1 główka kapusty 200 g kaszy gryczanej ugotowanej 300 g pieczarek 1 cebula garść suszonych grzybów (namoczonych) majeranek, sól, pieprz sos grzybowy lub pomidorowy gryczana ↔ pęczak, ryż; pieczarki ↔ boczniaki">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>069</div>
   <div class="rc-title">
@@ -2933,7 +2969,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p70" data-season="jesien" data-diff="1" data-rate="4" data-time="20" data-kcal="90" data-prot="2" data-diet="Z" data-veg="1" data-alg="mleko" data-text="marchewka z pomarańczą i kminem 600 g marchwi sok i skórka z ½ pomarańczy ½ łyżeczki kminu 10 g masła sól marchew ↔ pasternak, dynia">
+<article class="rc" id="p70" data-season="jesien" data-diff="1" data-rate="4" data-time="20" data-kcal="90" data-prot="2" data-diet="Z" data-veg="1" data-alg="mleko" data-ing="600 g marchwi sok i skórka z ½ pomarańczy ½ łyżeczki kminu 10 g masła sól" data-text="marchewka z pomarańczą i kminem 600 g marchwi sok i skórka z ½ pomarańczy ½ łyżeczki kminu 10 g masła sól marchew ↔ pasternak, dynia">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>070</div>
   <div class="rc-title">
@@ -2967,7 +3003,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez pomarańczy – odrobina miodu i masła</p></div>
  </footer>
 </article>
-<article class="rc" id="p71" data-season="jesien" data-diff="2" data-rate="5" data-time="31" data-kcal="290" data-prot="49" data-diet="Z" data-veg="0" data-alg="gorczyca" data-text="indyk z jabłkami i majerankiem 400 g piersi z indyka 2 kwaśne jabłka 1 łyżeczka majeranku 1 łyżka musztardy sól, pieprz jabłka ↔ gruszki, śliwki (5 min)">
+<article class="rc" id="p71" data-season="jesien" data-diff="2" data-rate="5" data-time="31" data-kcal="290" data-prot="49" data-diet="Z" data-veg="0" data-alg="gorczyca" data-ing="400 g piersi z indyka 2 kwaśne jabłka 1 łyżeczka majeranku 1 łyżka musztardy sól, pieprz" data-text="indyk z jabłkami i majerankiem 400 g piersi z indyka 2 kwaśne jabłka 1 łyżeczka majeranku 1 łyżka musztardy sól, pieprz jabłka ↔ gruszki, śliwki (5 min)">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>071</div>
   <div class="rc-title">
@@ -3001,7 +3037,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez musztardy – majeranek i odrobina oliwy</p></div>
  </footer>
 </article>
-<article class="rc" id="p72" data-season="jesien" data-diff="2" data-rate="4" data-time="55" data-kcal="200" data-prot="7" data-diet="N" data-veg="1" data-alg="gluten" data-text="kasza pęczak z grzybami i kapustą 150 g pęczaku 350 ml bulionu ¼ główki kapusty białej 250 g pieczarek 1 cebula natka, sól, pieprz pęczak ↔ orkisz, gryczana (25 min)">
+<article class="rc" id="p72" data-season="jesien" data-diff="2" data-rate="4" data-time="55" data-kcal="200" data-prot="7" data-diet="N" data-veg="1" data-alg="gluten" data-ing="150 g pęczaku 350 ml bulionu ¼ główki kapusty białej 250 g pieczarek 1 cebula natka, sól, pieprz" data-text="kasza pęczak z grzybami i kapustą 150 g pęczaku 350 ml bulionu ¼ główki kapusty białej 250 g pieczarek 1 cebula natka, sól, pieprz pęczak ↔ orkisz, gryczana (25 min)">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>072</div>
   <div class="rc-title">
@@ -3035,7 +3071,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p73" data-season="jesien" data-diff="1" data-rate="4" data-time="28" data-kcal="190" data-prot="4" data-diet="N" data-veg="1" data-alg="mleko orzechy seler gorczyca" data-text="seler i jabłko z orzechami – ciepła sałatka ½ selera 1 jabłko garść orzechów włoskich 3 łyżki jogurtu 1 łyżka majonezu sok z cytryny, sól seler ↔ pietruszka, kalarepa">
+<article class="rc" id="p73" data-season="jesien" data-diff="1" data-rate="4" data-time="28" data-kcal="190" data-prot="4" data-diet="N" data-veg="1" data-alg="mleko orzechy seler gorczyca" data-ing="½ selera 1 jabłko garść orzechów włoskich 3 łyżki jogurtu 1 łyżka majonezu sok z cytryny, sól" data-text="seler i jabłko z orzechami – ciepła sałatka ½ selera 1 jabłko garść orzechów włoskich 3 łyżki jogurtu 1 łyżka majonezu sok z cytryny, sól seler ↔ pietruszka, kalarepa">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>073</div>
   <div class="rc-title">
@@ -3069,7 +3105,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p74" data-season="jesien" data-diff="2" data-rate="4" data-time="35" data-kcal="350" data-prot="35" data-diet="N" data-veg="0" data-alg="ryby" data-text="dorsz z kapustą kiszoną i ziemniakami 500 g dorsza 600 g ziemniaków 300 g kapusty kiszonej 1 cebula 1 łyżka oleju koperek, kminek dorsz ↔ mintaj; kiszona kapusta ↔ ogórki kiszone (surowe)">
+<article class="rc" id="p74" data-season="jesien" data-diff="2" data-rate="4" data-time="35" data-kcal="350" data-prot="35" data-diet="N" data-veg="0" data-alg="ryby" data-ing="500 g dorsza 600 g ziemniaków 300 g kapusty kiszonej 1 cebula 1 łyżka oleju koperek, kminek" data-text="dorsz z kapustą kiszoną i ziemniakami 500 g dorsza 600 g ziemniaków 300 g kapusty kiszonej 1 cebula 1 łyżka oleju koperek, kminek dorsz ↔ mintaj; kiszona kapusta ↔ ogórki kiszone (surowe)">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>074</div>
   <div class="rc-title">
@@ -3103,7 +3139,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p75" data-season="jesien" data-diff="1" data-rate="4" data-time="19" data-kcal="130" data-prot="2" data-diet="T" data-veg="1" data-alg="mleko" data-text="pasternak i marchew z miodem 3 pasternaki 3 marchewki 1 łyżka miodu 15 g masła tymianek, sól pasternak ↔ pietruszka korzeń">
+<article class="rc" id="p75" data-season="jesien" data-diff="1" data-rate="4" data-time="19" data-kcal="130" data-prot="2" data-diet="T" data-veg="1" data-alg="mleko" data-ing="3 pasternaki 3 marchewki 1 łyżka miodu 15 g masła tymianek, sól" data-text="pasternak i marchew z miodem 3 pasternaki 3 marchewki 1 łyżka miodu 15 g masła tymianek, sól pasternak ↔ pietruszka korzeń">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>075</div>
   <div class="rc-title">
@@ -3137,7 +3173,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p76" data-season="jesien" data-diff="2" data-rate="5" data-time="45" data-kcal="320" data-prot="29" data-diet="Z" data-veg="0" data-alg="gluten mleko jaja" data-text="pulpety z indyka w sosie grzybowym 500 g mielonego indyka 1 jajko 1 bułka namoczona 10 g suszonych grzybów 200 ml śmietany 12% 1 łyżka mąki sól, pieprz, natka indyk ↔ kurczak; suszone grzyby ↔ pieczarki (sos jaśniejszy)">
+<article class="rc" id="p76" data-season="jesien" data-diff="2" data-rate="5" data-time="45" data-kcal="320" data-prot="29" data-diet="Z" data-veg="0" data-alg="gluten mleko jaja" data-ing="500 g mielonego indyka 1 jajko 1 bułka namoczona 10 g suszonych grzybów 200 ml śmietany 12% 1 łyżka mąki sól, pieprz, natka" data-text="pulpety z indyka w sosie grzybowym 500 g mielonego indyka 1 jajko 1 bułka namoczona 10 g suszonych grzybów 200 ml śmietany 12% 1 łyżka mąki sól, pieprz, natka indyk ↔ kurczak; suszone grzyby ↔ pieczarki (sos jaśniejszy)">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>076</div>
   <div class="rc-title">
@@ -3171,7 +3207,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>sos koperkowy na jogurcie 2% zamiast grzybowego ze śmietaną</p></div>
  </footer>
 </article>
-<article class="rc" id="p77" data-season="jesien" data-diff="1" data-rate="4" data-time="25" data-kcal="360" data-prot="19" data-diet="Z" data-veg="1" data-alg="mleko" data-text="bataty z twarożkiem ziołowym 2 bataty 150 g twarogu 2 łyżki jogurtu szczypior, czosnek sól, pieprz, papryka batat ↔ dynia, ziemniak (+5 min)">
+<article class="rc" id="p77" data-season="jesien" data-diff="1" data-rate="4" data-time="25" data-kcal="360" data-prot="19" data-diet="Z" data-veg="1" data-alg="mleko" data-ing="2 bataty 150 g twarogu 2 łyżki jogurtu szczypior, czosnek sól, pieprz, papryka" data-text="bataty z twarożkiem ziołowym 2 bataty 150 g twarogu 2 łyżki jogurtu szczypior, czosnek sól, pieprz, papryka batat ↔ dynia, ziemniak (+5 min)">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>077</div>
   <div class="rc-title">
@@ -3205,7 +3241,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>twarożek z koperkiem, bez czosnku i szczypioru</p></div>
  </footer>
 </article>
-<article class="rc" id="p78" data-season="jesien" data-diff="2" data-rate="4" data-time="23" data-kcal="200" data-prot="12" data-diet="N" data-veg="1" data-alg="gluten mleko gorczyca" data-text="kalafior z sosem serowym 1 kalafior 300 ml mleka 1 łyżka mąki 15 g masła 80 g sera żółtego gałka, musztarda, sól kalafior ↔ brokuł, brukselka">
+<article class="rc" id="p78" data-season="jesien" data-diff="2" data-rate="4" data-time="23" data-kcal="200" data-prot="12" data-diet="N" data-veg="1" data-alg="gluten mleko gorczyca" data-ing="1 kalafior 300 ml mleka 1 łyżka mąki 15 g masła 80 g sera żółtego gałka, musztarda, sól" data-text="kalafior z sosem serowym 1 kalafior 300 ml mleka 1 łyżka mąki 15 g masła 80 g sera żółtego gałka, musztarda, sól kalafior ↔ brokuł, brukselka">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>078</div>
   <div class="rc-title">
@@ -3239,7 +3275,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p79" data-season="jesien" data-diff="1" data-rate="4" data-time="16" data-kcal="100" data-prot="1" data-diet="N" data-veg="1" data-alg="gluten mleko" data-text="śliwki z cynamonem i kaszą manną 10 węgierek szczypta cynamonu 1 łyżka miodu kasza manna na mleku do podania śliwki ↔ jabłka, gruszki (dłużej)">
+<article class="rc" id="p79" data-season="jesien" data-diff="1" data-rate="4" data-time="16" data-kcal="100" data-prot="1" data-diet="N" data-veg="1" data-alg="gluten mleko" data-ing="10 węgierek szczypta cynamonu 1 łyżka miodu kasza manna na mleku do podania" data-text="śliwki z cynamonem i kaszą manną 10 węgierek szczypta cynamonu 1 łyżka miodu kasza manna na mleku do podania śliwki ↔ jabłka, gruszki (dłużej)">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>079</div>
   <div class="rc-title">
@@ -3273,7 +3309,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p80" data-season="jesien" data-diff="1" data-rate="4" data-time="15" data-kcal="190" data-prot="11" data-diet="N" data-veg="1" data-alg="gluten jaja" data-text="jarmuż z czosnkiem i jajkiem sadzonym 200 g jarmużu 2 ząbki czosnku 1 łyżka oliwy 2 jajka płatki chili, sól pieczywo razowe jarmuż ↔ szpinak (2 min), kapusta włoska">
+<article class="rc" id="p80" data-season="jesien" data-diff="1" data-rate="4" data-time="15" data-kcal="190" data-prot="11" data-diet="N" data-veg="1" data-alg="gluten jaja" data-ing="200 g jarmużu 2 ząbki czosnku 1 łyżka oliwy 2 jajka płatki chili, sól pieczywo razowe" data-text="jarmuż z czosnkiem i jajkiem sadzonym 200 g jarmużu 2 ząbki czosnku 1 łyżka oliwy 2 jajka płatki chili, sól pieczywo razowe jarmuż ↔ szpinak (2 min), kapusta włoska">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>080</div>
   <div class="rc-title">
@@ -3307,7 +3343,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p81" data-season="jesien" data-diff="1" data-rate="5" data-time="40" data-kcal="360" data-prot="28" data-diet="Z" data-veg="0" data-alg="" data-text="udka z kurczaka z marchewką i porem 4 udka z kurczaka 3 marchewki 1 por ziele angielskie, liść laurowy natka, sól, pieprz udka ↔ pałki; por ↔ seler">
+<article class="rc" id="p81" data-season="jesien" data-diff="1" data-rate="5" data-time="40" data-kcal="360" data-prot="28" data-diet="Z" data-veg="0" data-alg="" data-ing="4 udka z kurczaka 3 marchewki 1 por ziele angielskie, liść laurowy natka, sól, pieprz" data-text="udka z kurczaka z marchewką i porem 4 udka z kurczaka 3 marchewki 1 por ziele angielskie, liść laurowy natka, sól, pieprz udka ↔ pałki; por ↔ seler">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>081</div>
   <div class="rc-title">
@@ -3341,7 +3377,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>udka bez skóry albo pierś, zamiast pora pietruszka</p></div>
  </footer>
 </article>
-<article class="rc" id="p82" data-season="jesien" data-diff="3" data-rate="4" data-time="50" data-kcal="430" data-prot="7" data-diet="T" data-veg="1" data-alg="jaja" data-text="kluski śląskie na parze 1 kg ziemniaków ok. 250 g mąki ziemniaczanej 1 jajko sól mąka ziemniaczana: brak zamiennika (decyduje o strukturze)">
+<article class="rc" id="p82" data-season="jesien" data-diff="3" data-rate="4" data-time="50" data-kcal="430" data-prot="7" data-diet="T" data-veg="1" data-alg="jaja" data-ing="1 kg ziemniaków ok. 250 g mąki ziemniaczanej 1 jajko sól" data-text="kluski śląskie na parze 1 kg ziemniaków ok. 250 g mąki ziemniaczanej 1 jajko sól mąka ziemniaczana: brak zamiennika (decyduje o strukturze)">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>082</div>
   <div class="rc-title">
@@ -3375,7 +3411,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p83" data-season="jesien" data-diff="2" data-rate="4" data-time="40" data-kcal="280" data-prot="5" data-diet="Z" data-veg="1" data-alg="gluten mleko jaja" data-text="szarlotka na parze w słoiczkach 3 jabłka 1 łyżeczka cynamonu 2 łyżki cukru 100 g mąki 50 g masła 1 jajko ½ łyżeczki proszku do pieczenia jabłka ↔ gruszki, śliwki">
+<article class="rc" id="p83" data-season="jesien" data-diff="2" data-rate="4" data-time="40" data-kcal="280" data-prot="5" data-diet="Z" data-veg="1" data-alg="gluten mleko jaja" data-ing="3 jabłka 1 łyżeczka cynamonu 2 łyżki cukru 100 g mąki 50 g masła 1 jajko ½ łyżeczki proszku do pieczenia" data-text="szarlotka na parze w słoiczkach 3 jabłka 1 łyżeczka cynamonu 2 łyżki cukru 100 g mąki 50 g masła 1 jajko ½ łyżeczki proszku do pieczenia jabłka ↔ gruszki, śliwki">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>083</div>
   <div class="rc-title">
@@ -3409,7 +3445,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez cukru i kruszonki – jabłka z cynamonem i pokruszonym biszkoptem</p></div>
  </footer>
 </article>
-<article class="rc" id="p84" data-season="jesien" data-diff="1" data-rate="4" data-time="28" data-kcal="170" data-prot="5" data-diet="N" data-veg="1" data-alg="mleko" data-text="kapusta włoska z ziemniakami i koperkiem ½ główki kapusty włoskiej 500 g ziemniaków 20 g masła koperek, sól, pieprz kapusta włoska ↔ jarmuż, biała (+5 min)">
+<article class="rc" id="p84" data-season="jesien" data-diff="1" data-rate="4" data-time="28" data-kcal="170" data-prot="5" data-diet="N" data-veg="1" data-alg="mleko" data-ing="½ główki kapusty włoskiej 500 g ziemniaków 20 g masła koperek, sól, pieprz" data-text="kapusta włoska z ziemniakami i koperkiem ½ główki kapusty włoskiej 500 g ziemniaków 20 g masła koperek, sól, pieprz kapusta włoska ↔ jarmuż, biała (+5 min)">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>084</div>
   <div class="rc-title">
@@ -3443,7 +3479,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p85" data-season="jesien" data-diff="2" data-rate="4" data-time="29" data-kcal="370" data-prot="30" data-diet="Z" data-veg="0" data-alg="ryby" data-text="makrela z warzywami korzeniowymi 2 świeże makrele (filety) 2 marchewki 1 pietruszka sok z cytryny chrzan, natka, sól makrela ↔ śledź świeży, łosoś">
+<article class="rc" id="p85" data-season="jesien" data-diff="2" data-rate="4" data-time="29" data-kcal="370" data-prot="30" data-diet="Z" data-veg="0" data-alg="ryby" data-ing="2 świeże makrele (filety) 2 marchewki 1 pietruszka sok z cytryny chrzan, natka, sól" data-text="makrela z warzywami korzeniowymi 2 świeże makrele (filety) 2 marchewki 1 pietruszka sok z cytryny chrzan, natka, sól makrela ↔ śledź świeży, łosoś">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>085</div>
   <div class="rc-title">
@@ -3477,7 +3513,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez chrzanu – z koperkiem</p></div>
  </footer>
 </article>
-<article class="rc" id="p86" data-season="jesien" data-diff="1" data-rate="4" data-time="31" data-kcal="250" data-prot="12" data-diet="N" data-veg="1" data-alg="" data-text="gulasz z soczewicy i warzyw korzeniowych 150 g czerwonej soczewicy 2 marchewki 1 pietruszka 2 ziemniaki 1 cebula 400 g pomidorów papryka słodka, kmin, sól soczewica ↔ ciecierzyca z puszki; ziemniak ↔ batat">
+<article class="rc" id="p86" data-season="jesien" data-diff="1" data-rate="4" data-time="31" data-kcal="250" data-prot="12" data-diet="N" data-veg="1" data-alg="" data-ing="150 g czerwonej soczewicy 2 marchewki 1 pietruszka 2 ziemniaki 1 cebula 400 g pomidorów papryka słodka, kmin, sól" data-text="gulasz z soczewicy i warzyw korzeniowych 150 g czerwonej soczewicy 2 marchewki 1 pietruszka 2 ziemniaki 1 cebula 400 g pomidorów papryka słodka, kmin, sól soczewica ↔ ciecierzyca z puszki; ziemniak ↔ batat">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>086</div>
   <div class="rc-title">
@@ -3511,7 +3547,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p87" data-season="jesien" data-diff="1" data-rate="4" data-time="25" data-kcal="180" data-prot="8" data-diet="Z" data-veg="1" data-alg="mleko siarczyny" data-text="jabłka faszerowane twarogiem 4 jabłka 150 g twarogu 1 łyżka miodu garść rodzynek cynamon jabłka ↔ gruszki, pigwa">
+<article class="rc" id="p87" data-season="jesien" data-diff="1" data-rate="4" data-time="25" data-kcal="180" data-prot="8" data-diet="Z" data-veg="1" data-alg="mleko siarczyny" data-ing="4 jabłka 150 g twarogu 1 łyżka miodu garść rodzynek cynamon" data-text="jabłka faszerowane twarogiem 4 jabłka 150 g twarogu 1 łyżka miodu garść rodzynek cynamon jabłka ↔ gruszki, pigwa">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>087</div>
   <div class="rc-title">
@@ -3545,7 +3581,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez rodzynek (owoce suszone), jabłka obrane</p></div>
  </footer>
 </article>
-<article class="rc" id="p88" data-season="jesien" data-diff="2" data-rate="4" data-time="35" data-kcal="250" data-prot="37" data-diet="Z" data-veg="0" data-alg="gorczyca" data-text="polędwiczka wieprzowa z musztardą i fasolką 500 g polędwiczki wieprzowej 2 łyżki musztardy francuskiej 1 łyżeczka miodu 300 g fasolki mrożonej sól, pieprz polędwiczka ↔ schab w plastrach (15 min); fasolka ↔ brukselka">
+<article class="rc" id="p88" data-season="jesien" data-diff="2" data-rate="4" data-time="35" data-kcal="250" data-prot="37" data-diet="Z" data-veg="0" data-alg="gorczyca" data-ing="500 g polędwiczki wieprzowej 2 łyżki musztardy francuskiej 1 łyżeczka miodu 300 g fasolki mrożonej sól, pieprz" data-text="polędwiczka wieprzowa z musztardą i fasolką 500 g polędwiczki wieprzowej 2 łyżki musztardy francuskiej 1 łyżeczka miodu 300 g fasolki mrożonej sól, pieprz polędwiczka ↔ schab w plastrach (15 min); fasolka ↔ brukselka">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>088</div>
   <div class="rc-title">
@@ -3579,7 +3615,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>zioła zamiast musztardy, tylko młoda, cienka fasolka</p></div>
  </footer>
 </article>
-<article class="rc" id="p89" data-season="jesien" data-diff="1" data-rate="5" data-time="26" data-kcal="390" data-prot="47" data-diet="T" data-veg="0" data-alg="mleko" data-text="indyk z puree z dyni i ziemniaka 350 g piersi z indyka 400 g dyni 2 ziemniaki 10 g masła tymianek, szczypta gałki, sól dynia ↔ marchew, batat">
+<article class="rc" id="p89" data-season="jesien" data-diff="1" data-rate="5" data-time="26" data-kcal="390" data-prot="47" data-diet="T" data-veg="0" data-alg="mleko" data-ing="350 g piersi z indyka 400 g dyni 2 ziemniaki 10 g masła tymianek, szczypta gałki, sól" data-text="indyk z puree z dyni i ziemniaka 350 g piersi z indyka 400 g dyni 2 ziemniaki 10 g masła tymianek, szczypta gałki, sól dynia ↔ marchew, batat">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>089</div>
   <div class="rc-title">
@@ -3613,7 +3649,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p90" data-season="jesien" data-diff="2" data-rate="5" data-time="28" data-kcal="410" data-prot="33" data-diet="T" data-veg="0" data-alg="mleko ryby" data-text="łosoś z puree z pietruszki 2 kawałki łososia (ok. 280 g) 3 korzenie pietruszki 1 ziemniak 80 ml mleka 2% koperek, sól łosoś ↔ makrela, pstrąg; pietruszka ↔ marchew">
+<article class="rc" id="p90" data-season="jesien" data-diff="2" data-rate="5" data-time="28" data-kcal="410" data-prot="33" data-diet="T" data-veg="0" data-alg="mleko ryby" data-ing="2 kawałki łososia (ok. 280 g) 3 korzenie pietruszki 1 ziemniak 80 ml mleka 2% koperek, sól" data-text="łosoś z puree z pietruszki 2 kawałki łososia (ok. 280 g) 3 korzenie pietruszki 1 ziemniak 80 ml mleka 2% koperek, sól łosoś ↔ makrela, pstrąg; pietruszka ↔ marchew">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>090</div>
   <div class="rc-title">
@@ -3647,7 +3683,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p91" data-season="jesien" data-diff="1" data-rate="4" data-time="20" data-kcal="300" data-prot="10" data-diet="T" data-veg="1" data-alg="gluten mleko" data-text="mus jabłkowy z cynamonem i kaszą manną 3 jabłka cynamon 50 g kaszy manny 400 ml mleka 2% jabłka ↔ banan (bez parowania), morele">
+<article class="rc" id="p91" data-season="jesien" data-diff="1" data-rate="4" data-time="20" data-kcal="300" data-prot="10" data-diet="T" data-veg="1" data-alg="gluten mleko" data-ing="3 jabłka cynamon 50 g kaszy manny 400 ml mleka 2%" data-text="mus jabłkowy z cynamonem i kaszą manną 3 jabłka cynamon 50 g kaszy manny 400 ml mleka 2% jabłka ↔ banan (bez parowania), morele">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>091</div>
   <div class="rc-title">
@@ -3681,7 +3717,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p92" data-season="jesien" data-diff="1" data-rate="4" data-time="25" data-kcal="130" data-prot="5" data-diet="T" data-veg="1" data-alg="mleko" data-text="krem z dyni i marchwi z imbirem 700 g dyni 2 marchewki 1 ziemniak 1 cm imbiru 800 ml wody lub domowego bulionu warzywnego 100 ml mleka 2% natka dynia ↔ marchew, batat">
+<article class="rc" id="p92" data-season="jesien" data-diff="1" data-rate="4" data-time="25" data-kcal="130" data-prot="5" data-diet="T" data-veg="1" data-alg="mleko" data-ing="700 g dyni 2 marchewki 1 ziemniak 1 cm imbiru 800 ml wody lub domowego bulionu warzywnego 100 ml mleka 2% natka" data-text="krem z dyni i marchwi z imbirem 700 g dyni 2 marchewki 1 ziemniak 1 cm imbiru 800 ml wody lub domowego bulionu warzywnego 100 ml mleka 2% natka dynia ↔ marchew, batat">
  <header class="rc-head">
   <div class="rc-no" title="Jesień"><span>J</span>092</div>
   <div class="rc-title">
@@ -3738,7 +3774,7 @@ body.searching .rc.open .rc-desc{display:block}
   </div>
  </div>
  <div class="recipes">
-<article class="rc" id="p93" data-season="zima" data-diff="1" data-rate="4" data-time="26" data-kcal="90" data-prot="4" data-diet="Z" data-veg="1" data-alg="mleko seler" data-text="warzywa korzeniowe z sosem chrzanowym 2 marchewki 2 pietruszki ¼ selera 200 g jogurtu 1 łyżka chrzanu natka, sól dowolny korzeń ↔ dowolny korzeń, czas wyrównasz grubością">
+<article class="rc" id="p93" data-season="zima" data-diff="1" data-rate="4" data-time="26" data-kcal="90" data-prot="4" data-diet="Z" data-veg="1" data-alg="mleko seler" data-ing="2 marchewki 2 pietruszki ¼ selera 200 g jogurtu 1 łyżka chrzanu natka, sól" data-text="warzywa korzeniowe z sosem chrzanowym 2 marchewki 2 pietruszki ¼ selera 200 g jogurtu 1 łyżka chrzanu natka, sól dowolny korzeń ↔ dowolny korzeń, czas wyrównasz grubością">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>093</div>
   <div class="rc-title">
@@ -3772,7 +3808,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>sos jogurtowy z koperkiem zamiast chrzanowego</p></div>
  </footer>
 </article>
-<article class="rc" id="p94" data-season="zima" data-diff="2" data-rate="4" data-time="30" data-kcal="180" data-prot="9" data-diet="N" data-veg="1" data-alg="" data-text="kapusta z grochem po zimowemu 500 g kapusty kiszonej 400 g grochu łuskanego ugotowanego (lub z puszki) 1 cebula 1 łyżka oleju majeranek, pieprz groch ↔ fasola biała z puszki">
+<article class="rc" id="p94" data-season="zima" data-diff="2" data-rate="4" data-time="30" data-kcal="180" data-prot="9" data-diet="N" data-veg="1" data-alg="" data-ing="500 g kapusty kiszonej 400 g grochu łuskanego ugotowanego (lub z puszki) 1 cebula 1 łyżka oleju majeranek, pieprz" data-text="kapusta z grochem po zimowemu 500 g kapusty kiszonej 400 g grochu łuskanego ugotowanego (lub z puszki) 1 cebula 1 łyżka oleju majeranek, pieprz groch ↔ fasola biała z puszki">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>094</div>
   <div class="rc-title">
@@ -3806,7 +3842,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p95" data-season="zima" data-diff="1" data-rate="4" data-time="23" data-kcal="320" data-prot="54" data-diet="Z" data-veg="0" data-alg="mleko" data-text="pierś z kurczaka z brokułem mrożonym 2 piersi z kurczaka 400 g brokuła mrożonego 1 łyżeczka czosnku granulowanego 1 łyżeczka papryki sos jogurtowy, sól brokuł ↔ dowolna mieszanka mrożona">
+<article class="rc" id="p95" data-season="zima" data-diff="1" data-rate="4" data-time="23" data-kcal="320" data-prot="54" data-diet="Z" data-veg="0" data-alg="mleko" data-ing="2 piersi z kurczaka 400 g brokuła mrożonego 1 łyżeczka czosnku granulowanego 1 łyżeczka papryki sos jogurtowy, sól" data-text="pierś z kurczaka z brokułem mrożonym 2 piersi z kurczaka 400 g brokuła mrożonego 1 łyżeczka czosnku granulowanego 1 łyżeczka papryki sos jogurtowy, sól brokuł ↔ dowolna mieszanka mrożona">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>095</div>
   <div class="rc-title">
@@ -3840,7 +3876,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez czosnku granulowanego</p></div>
  </footer>
 </article>
-<article class="rc" id="p96" data-season="zima" data-diff="1" data-rate="4" data-time="40" data-kcal="400" data-prot="26" data-diet="Z" data-veg="1" data-alg="mleko" data-text="ziemniaki w mundurkach z twarożkiem 1 kg ziemniaków 400 g twarogu 200 g jogurtu 1 cebula lub szczypior sól, pieprz masło ziemniaki ↔ bataty (−8 min)">
+<article class="rc" id="p96" data-season="zima" data-diff="1" data-rate="4" data-time="40" data-kcal="400" data-prot="26" data-diet="Z" data-veg="1" data-alg="mleko" data-ing="1 kg ziemniaków 400 g twarogu 200 g jogurtu 1 cebula lub szczypior sól, pieprz masło" data-text="ziemniaki w mundurkach z twarożkiem 1 kg ziemniaków 400 g twarogu 200 g jogurtu 1 cebula lub szczypior sól, pieprz masło ziemniaki ↔ bataty (−8 min)">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>096</div>
   <div class="rc-title">
@@ -3874,7 +3910,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>ziemniaki obrane, twarożek z koperkiem bez cebuli</p></div>
  </footer>
 </article>
-<article class="rc" id="p97" data-season="zima" data-diff="1" data-rate="4" data-time="20" data-kcal="200" data-prot="30" data-diet="N" data-veg="0" data-alg="mleko ryby gorczyca" data-text="dorsz z porem i musztardą 2 filety z dorsza 1 por 1 łyżka musztardy 3 łyżki jogurtu cytryna, sól, koperek suszony dorsz ↔ mintaj mrożony; por ↔ cebula">
+<article class="rc" id="p97" data-season="zima" data-diff="1" data-rate="4" data-time="20" data-kcal="200" data-prot="30" data-diet="N" data-veg="0" data-alg="mleko ryby gorczyca" data-ing="2 filety z dorsza 1 por 1 łyżka musztardy 3 łyżki jogurtu cytryna, sól, koperek suszony" data-text="dorsz z porem i musztardą 2 filety z dorsza 1 por 1 łyżka musztardy 3 łyżki jogurtu cytryna, sól, koperek suszony dorsz ↔ mintaj mrożony; por ↔ cebula">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>097</div>
   <div class="rc-title">
@@ -3908,7 +3944,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p98" data-season="zima" data-diff="2" data-rate="4" data-time="48" data-kcal="140" data-prot="14" data-diet="N" data-veg="0" data-alg="siarczyny" data-text="bigos lekki – kapusta, grzyby, indyk 500 g kapusty kiszonej 300 g kapusty białej 300 g mięsa z indyka 15 g suszonych grzybów 1 cebula 2 łyżki koncentratu śliwki suszone, majeranek, ziele, liść indyk ↔ kiełbasa, łopatka; biała ↔ włoska">
+<article class="rc" id="p98" data-season="zima" data-diff="2" data-rate="4" data-time="48" data-kcal="140" data-prot="14" data-diet="N" data-veg="0" data-alg="siarczyny" data-ing="500 g kapusty kiszonej 300 g kapusty białej 300 g mięsa z indyka 15 g suszonych grzybów 1 cebula 2 łyżki koncentratu śliwki suszone, majeranek, ziele, liść" data-text="bigos lekki – kapusta, grzyby, indyk 500 g kapusty kiszonej 300 g kapusty białej 300 g mięsa z indyka 15 g suszonych grzybów 1 cebula 2 łyżki koncentratu śliwki suszone, majeranek, ziele, liść indyk ↔ kiełbasa, łopatka; biała ↔ włoska">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>098</div>
   <div class="rc-title">
@@ -3942,7 +3978,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p99" data-season="zima" data-diff="1" data-rate="4" data-time="65" data-kcal="120" data-prot="3" data-diet="Z" data-veg="1" data-alg="mleko" data-text="buraczki z jabłkiem na ciepło 4 buraki 1 kwaśne jabłko 1 łyżka soku z cytryny 1 łyżeczka cukru 1 łyżka masła sól buraki ↔ marchew z jabłkiem">
+<article class="rc" id="p99" data-season="zima" data-diff="1" data-rate="4" data-time="65" data-kcal="120" data-prot="3" data-diet="Z" data-veg="1" data-alg="mleko" data-ing="4 buraki 1 kwaśne jabłko 1 łyżka soku z cytryny 1 łyżeczka cukru 1 łyżka masła sól" data-text="buraczki z jabłkiem na ciepło 4 buraki 1 kwaśne jabłko 1 łyżka soku z cytryny 1 łyżeczka cukru 1 łyżka masła sól buraki ↔ marchew z jabłkiem">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>099</div>
   <div class="rc-title">
@@ -3976,7 +4012,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez cytryny i cukru</p></div>
  </footer>
 </article>
-<article class="rc" id="p100" data-season="zima" data-diff="3" data-rate="5" data-time="85" data-kcal="450" data-prot="12" data-diet="N" data-veg="1" data-alg="gluten" data-text="pierogi z kapustą i grzybami ciasto: 400 g mąki, 220 ml ciepłej wody, 1 łyżka oleju 500 g kapusty kiszonej 20 g suszonych grzybów 1 cebula sól, pieprz kapusta ↔ soczewica z cebulą (farsz wegański)">
+<article class="rc" id="p100" data-season="zima" data-diff="3" data-rate="5" data-time="85" data-kcal="450" data-prot="12" data-diet="N" data-veg="1" data-alg="gluten" data-ing="ciasto: 400 g mąki, 220 ml ciepłej wody, 1 łyżka oleju 500 g kapusty kiszonej 20 g suszonych grzybów 1 cebula sól, pieprz" data-text="pierogi z kapustą i grzybami ciasto: 400 g mąki, 220 ml ciepłej wody, 1 łyżka oleju 500 g kapusty kiszonej 20 g suszonych grzybów 1 cebula sól, pieprz kapusta ↔ soczewica z cebulą (farsz wegański)">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>100</div>
   <div class="rc-title">
@@ -4010,7 +4046,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p101" data-season="zima" data-diff="1" data-rate="4" data-time="20" data-kcal="360" data-prot="12" data-diet="Z" data-veg="1" data-alg="gluten mleko orzechy" data-text="owsianka na parze z jabłkiem 80 g płatków owsianych 300 ml mleka 1 jabłko starte cynamon miód, orzechy jabłko ↔ gruszka, mrożone owoce">
+<article class="rc" id="p101" data-season="zima" data-diff="1" data-rate="4" data-time="20" data-kcal="360" data-prot="12" data-diet="Z" data-veg="1" data-alg="gluten mleko orzechy" data-ing="80 g płatków owsianych 300 ml mleka 1 jabłko starte cynamon miód, orzechy" data-text="owsianka na parze z jabłkiem 80 g płatków owsianych 300 ml mleka 1 jabłko starte cynamon miód, orzechy jabłko ↔ gruszka, mrożone owoce">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>101</div>
   <div class="rc-title">
@@ -4044,7 +4080,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>płatki błyskawiczne, mleko 2%, bez orzechów</p></div>
  </footer>
 </article>
-<article class="rc" id="p102" data-season="zima" data-diff="2" data-rate="3" data-time="40" data-kcal="140" data-prot="5" data-diet="Z" data-veg="1" data-alg="gluten jaja" data-text="kotlety z kaszy jaglanej i marchwi 200 g kaszy jaglanej ugotowanej 2 marchewki starte 1 cebula 1 jajko 3 łyżki bułki tartej majeranek, sól jaglana ↔ gryczana, ryż; marchew ↔ dynia">
+<article class="rc" id="p102" data-season="zima" data-diff="2" data-rate="3" data-time="40" data-kcal="140" data-prot="5" data-diet="Z" data-veg="1" data-alg="gluten jaja" data-ing="200 g kaszy jaglanej ugotowanej 2 marchewki starte 1 cebula 1 jajko 3 łyżki bułki tartej majeranek, sól" data-text="kotlety z kaszy jaglanej i marchwi 200 g kaszy jaglanej ugotowanej 2 marchewki starte 1 cebula 1 jajko 3 łyżki bułki tartej majeranek, sól jaglana ↔ gryczana, ryż; marchew ↔ dynia">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>102</div>
   <div class="rc-title">
@@ -4078,7 +4114,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez cebuli</p></div>
  </footer>
 </article>
-<article class="rc" id="p103" data-season="zima" data-diff="2" data-rate="4" data-time="50" data-kcal="560" data-prot="53" data-diet="N" data-veg="0" data-alg="gluten soja" data-text="kurczak w pomarańczy z ryżem 2 piersi z kurczaka 1 pomarańcza 150 g ryżu 225 ml wody 1 łyżka miodu 1 łyżka sosu sojowego imbir pomarańcza ↔ mandarynki; kurczak ↔ indyk">
+<article class="rc" id="p103" data-season="zima" data-diff="2" data-rate="4" data-time="50" data-kcal="560" data-prot="53" data-diet="N" data-veg="0" data-alg="gluten soja" data-ing="2 piersi z kurczaka 1 pomarańcza 150 g ryżu 225 ml wody 1 łyżka miodu 1 łyżka sosu sojowego imbir" data-text="kurczak w pomarańczy z ryżem 2 piersi z kurczaka 1 pomarańcza 150 g ryżu 225 ml wody 1 łyżka miodu 1 łyżka sosu sojowego imbir pomarańcza ↔ mandarynki; kurczak ↔ indyk">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>103</div>
   <div class="rc-title">
@@ -4112,7 +4148,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p104" data-season="zima" data-diff="3" data-rate="4" data-time="23" data-kcal="400" data-prot="27" data-diet="Z" data-veg="0" data-alg="gluten mleko jaja" data-text="jajka po benedyktyńsku z pary 4 jajka 2 bułki angielskie lub grzanki 4 plastry szynki sos holenderski na skróty (jogurt + żółtko) szczypior szynka ↔ szpinak; bułki ↔ chleb razowy">
+<article class="rc" id="p104" data-season="zima" data-diff="3" data-rate="4" data-time="23" data-kcal="400" data-prot="27" data-diet="Z" data-veg="0" data-alg="gluten mleko jaja" data-ing="4 jajka 2 bułki angielskie lub grzanki 4 plastry szynki sos holenderski na skróty (jogurt + żółtko) szczypior" data-text="jajka po benedyktyńsku z pary 4 jajka 2 bułki angielskie lub grzanki 4 plastry szynki sos holenderski na skróty (jogurt + żółtko) szczypior szynka ↔ szpinak; bułki ↔ chleb razowy">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>104</div>
   <div class="rc-title">
@@ -4146,7 +4182,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>zamiast sosu holenderskiego jogurt 2% z koperkiem</p></div>
  </footer>
 </article>
-<article class="rc" id="p105" data-season="zima" data-diff="1" data-rate="4" data-time="35" data-kcal="290" data-prot="12" data-diet="N" data-veg="1" data-alg="" data-text="kasza gryczana z pieczarkami i natką 200 g kaszy gryczanej prażonej 400 ml wody 300 g pieczarek 1 cebula natka, sól gryczana ↔ pęczak (40 min), jaglana (28 min)">
+<article class="rc" id="p105" data-season="zima" data-diff="1" data-rate="4" data-time="35" data-kcal="290" data-prot="12" data-diet="N" data-veg="1" data-alg="" data-ing="200 g kaszy gryczanej prażonej 400 ml wody 300 g pieczarek 1 cebula natka, sól" data-text="kasza gryczana z pieczarkami i natką 200 g kaszy gryczanej prażonej 400 ml wody 300 g pieczarek 1 cebula natka, sól gryczana ↔ pęczak (40 min), jaglana (28 min)">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>105</div>
   <div class="rc-title">
@@ -4180,7 +4216,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p106" data-season="zima" data-diff="1" data-rate="4" data-time="23" data-kcal="460" data-prot="29" data-diet="N" data-veg="0" data-alg="mleko ryby" data-text="pstrąg wędzony z ziemniakami i ćwikłą 600 g ziemniaków 1 wędzony pstrąg 4 łyżki ćwikły koperek, masło pstrąg wędzony ↔ makrela wędzona">
+<article class="rc" id="p106" data-season="zima" data-diff="1" data-rate="4" data-time="23" data-kcal="460" data-prot="29" data-diet="N" data-veg="0" data-alg="mleko ryby" data-ing="600 g ziemniaków 1 wędzony pstrąg 4 łyżki ćwikły koperek, masło" data-text="pstrąg wędzony z ziemniakami i ćwikłą 600 g ziemniaków 1 wędzony pstrąg 4 łyżki ćwikły koperek, masło pstrąg wędzony ↔ makrela wędzona">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>106</div>
   <div class="rc-title">
@@ -4214,7 +4250,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p107" data-season="zima" data-diff="1" data-rate="4" data-time="26" data-kcal="160" data-prot="5" data-diet="Z" data-veg="1" data-alg="mleko" data-text="krem z pietruszki i ziemniaka 4 pietruszki 2 ziemniaki 1 cebula 800 ml bulionu 100 ml śmietanki gałka, natka pietruszka ↔ seler, pasternak, kalafior">
+<article class="rc" id="p107" data-season="zima" data-diff="1" data-rate="4" data-time="26" data-kcal="160" data-prot="5" data-diet="Z" data-veg="1" data-alg="mleko" data-ing="4 pietruszki 2 ziemniaki 1 cebula 800 ml bulionu 100 ml śmietanki gałka, natka" data-text="krem z pietruszki i ziemniaka 4 pietruszki 2 ziemniaki 1 cebula 800 ml bulionu 100 ml śmietanki gałka, natka pietruszka ↔ seler, pasternak, kalafior">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>107</div>
   <div class="rc-title">
@@ -4248,7 +4284,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez cebuli, mleko 2% zamiast śmietanki, bulion domowy bez kostki</p></div>
  </footer>
 </article>
-<article class="rc" id="p108" data-season="zima" data-diff="2" data-rate="4" data-time="30" data-kcal="380" data-prot="28" data-diet="Z" data-veg="1" data-alg="gluten mleko jaja" data-text="leniwe z cynamonem i masłem 500 g twarogu 1 jajko 150 g mąki szczypta soli masło, cukier, cynamon cynamon ↔ prażone jabłka, mrożone owoce">
+<article class="rc" id="p108" data-season="zima" data-diff="2" data-rate="4" data-time="30" data-kcal="380" data-prot="28" data-diet="Z" data-veg="1" data-alg="gluten mleko jaja" data-ing="500 g twarogu 1 jajko 150 g mąki szczypta soli masło, cukier, cynamon" data-text="leniwe z cynamonem i masłem 500 g twarogu 1 jajko 150 g mąki szczypta soli masło, cukier, cynamon cynamon ↔ prażone jabłka, mrożone owoce">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>108</div>
   <div class="rc-title">
@@ -4282,7 +4318,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez cukru, masła tylko odrobina</p></div>
  </footer>
 </article>
-<article class="rc" id="p109" data-season="zima" data-diff="2" data-rate="4" data-time="30" data-kcal="240" data-prot="33" data-diet="N" data-veg="0" data-alg="gorczyca" data-text="schab z kapustą i kminkiem 600 g schabu ½ główki kapusty białej 1 łyżeczka kminku 1 łyżka musztardy majeranek, sól, pieprz schab ↔ pierś z indyka; kapusta biała ↔ włoska (−5 min)">
+<article class="rc" id="p109" data-season="zima" data-diff="2" data-rate="4" data-time="30" data-kcal="240" data-prot="33" data-diet="N" data-veg="0" data-alg="gorczyca" data-ing="600 g schabu ½ główki kapusty białej 1 łyżeczka kminku 1 łyżka musztardy majeranek, sól, pieprz" data-text="schab z kapustą i kminkiem 600 g schabu ½ główki kapusty białej 1 łyżeczka kminku 1 łyżka musztardy majeranek, sól, pieprz schab ↔ pierś z indyka; kapusta biała ↔ włoska (−5 min)">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>109</div>
   <div class="rc-title">
@@ -4316,7 +4352,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p110" data-season="zima" data-diff="1" data-rate="4" data-time="55" data-kcal="410" data-prot="13" data-diet="N" data-veg="1" data-alg="gluten mleko orzechy siarczyny" data-text="pęczak z buraczkami i fetą 150 g pęczaku 350 ml wody 2 buraki 100 g fety garść orzechów 1 łyżka octu balsamicznego oliwa pęczak ↔ orkisz, gryczana; feta ↔ twaróg">
+<article class="rc" id="p110" data-season="zima" data-diff="1" data-rate="4" data-time="55" data-kcal="410" data-prot="13" data-diet="N" data-veg="1" data-alg="gluten mleko orzechy siarczyny" data-ing="150 g pęczaku 350 ml wody 2 buraki 100 g fety garść orzechów 1 łyżka octu balsamicznego oliwa" data-text="pęczak z buraczkami i fetą 150 g pęczaku 350 ml wody 2 buraki 100 g fety garść orzechów 1 łyżka octu balsamicznego oliwa pęczak ↔ orkisz, gryczana; feta ↔ twaróg">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>110</div>
   <div class="rc-title">
@@ -4350,7 +4386,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p111" data-season="zima" data-diff="1" data-rate="3" data-time="20" data-kcal="180" data-prot="6" data-diet="N" data-veg="1" data-alg="mleko siarczyny" data-text="kompot z suszu – owoce z pary 200 g suszonych śliwek, moreli, jabłek 100 ml wody goździk, cynamon jogurt susz ↔ rodzynki, figi">
+<article class="rc" id="p111" data-season="zima" data-diff="1" data-rate="3" data-time="20" data-kcal="180" data-prot="6" data-diet="N" data-veg="1" data-alg="mleko siarczyny" data-ing="200 g suszonych śliwek, moreli, jabłek 100 ml wody goździk, cynamon jogurt" data-text="kompot z suszu – owoce z pary 200 g suszonych śliwek, moreli, jabłek 100 ml wody goździk, cynamon jogurt susz ↔ rodzynki, figi">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>111</div>
   <div class="rc-title">
@@ -4384,7 +4420,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p112" data-season="zima" data-diff="3" data-rate="4" data-time="105" data-kcal="530" data-prot="19" data-diet="Z" data-veg="1" data-alg="gluten mleko" data-text="bułeczki drożdżowe z serem i szczypiorem 400 g mąki 20 g świeżych drożdży 220 ml mleka 1 łyżka oleju 1 łyżeczka cukru, sól 100 g sera żółtego startego szczypior ser żółty ↔ feta; szczypior ↔ koperek">
+<article class="rc" id="p112" data-season="zima" data-diff="3" data-rate="4" data-time="105" data-kcal="530" data-prot="19" data-diet="Z" data-veg="1" data-alg="gluten mleko" data-ing="400 g mąki 20 g świeżych drożdży 220 ml mleka 1 łyżka oleju 1 łyżeczka cukru, sól 100 g sera żółtego startego szczypior" data-text="bułeczki drożdżowe z serem i szczypiorem 400 g mąki 20 g świeżych drożdży 220 ml mleka 1 łyżka oleju 1 łyżeczka cukru, sól 100 g sera żółtego startego szczypior ser żółty ↔ feta; szczypior ↔ koperek">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>112</div>
   <div class="rc-title">
@@ -4418,7 +4454,7 @@ body.searching .rc.open .rc-desc{display:block}
   <div class="dietbox"><span class="tag">Wersja łatwostrawna</span><p>bez sera żółtego i szczypioru – z koperkiem albo jako zwykłe pampuchy</p></div>
  </footer>
 </article>
-<article class="rc" id="p113" data-season="zima" data-diff="1" data-rate="5" data-time="50" data-kcal="410" data-prot="38" data-diet="T" data-veg="0" data-alg="gluten mleko" data-text="potrawka z kurczaka z marchewką i ryżem 400 g piersi z kurczaka 150 g ryżu białego 225 ml wody 2 marchewki 1 pietruszka 200 ml mleka 2% 1 łyżka mąki pszennej koperek, sól kurczak ↔ indyk, cielęcina; ryż ↔ kasza jaglana">
+<article class="rc" id="p113" data-season="zima" data-diff="1" data-rate="5" data-time="50" data-kcal="410" data-prot="38" data-diet="T" data-veg="0" data-alg="gluten mleko" data-ing="400 g piersi z kurczaka 150 g ryżu białego 225 ml wody 2 marchewki 1 pietruszka 200 ml mleka 2% 1 łyżka mąki pszennej koperek, sól" data-text="potrawka z kurczaka z marchewką i ryżem 400 g piersi z kurczaka 150 g ryżu białego 225 ml wody 2 marchewki 1 pietruszka 200 ml mleka 2% 1 łyżka mąki pszennej koperek, sól kurczak ↔ indyk, cielęcina; ryż ↔ kasza jaglana">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>113</div>
   <div class="rc-title">
@@ -4452,7 +4488,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p114" data-season="zima" data-diff="2" data-rate="4" data-time="33" data-kcal="410" data-prot="35" data-diet="T" data-veg="0" data-alg="mleko ryby" data-text="dorsz w warzywnej kołderce z puree 300 g filetu z dorsza 1 marchew 1 pietruszka 500 g ziemniaków 80 ml mleka 2% 10 g masła koperek, sól dorsz ↔ mintaj, morszczuk, łosoś">
+<article class="rc" id="p114" data-season="zima" data-diff="2" data-rate="4" data-time="33" data-kcal="410" data-prot="35" data-diet="T" data-veg="0" data-alg="mleko ryby" data-ing="300 g filetu z dorsza 1 marchew 1 pietruszka 500 g ziemniaków 80 ml mleka 2% 10 g masła koperek, sól" data-text="dorsz w warzywnej kołderce z puree 300 g filetu z dorsza 1 marchew 1 pietruszka 500 g ziemniaków 80 ml mleka 2% 10 g masła koperek, sól dorsz ↔ mintaj, morszczuk, łosoś">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>114</div>
   <div class="rc-title">
@@ -4486,7 +4522,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p115" data-season="zima" data-diff="1" data-rate="4" data-time="24" data-kcal="380" data-prot="13" data-diet="T" data-veg="1" data-alg="gluten mleko" data-text="kuskus z warzywami korzeniowymi i jogurtem 120 g kuskusu 180 ml wrzątku 1 marchew 1 pietruszka 200 g dyni (lub więcej marchwi) 1 łyżka oliwy 150 g jogurtu naturalnego 2% natka, sól kuskus ↔ kasza jaglana, ryż biały">
+<article class="rc" id="p115" data-season="zima" data-diff="1" data-rate="4" data-time="24" data-kcal="380" data-prot="13" data-diet="T" data-veg="1" data-alg="gluten mleko" data-ing="120 g kuskusu 180 ml wrzątku 1 marchew 1 pietruszka 200 g dyni (lub więcej marchwi) 1 łyżka oliwy 150 g jogurtu naturalnego 2% natka, sól" data-text="kuskus z warzywami korzeniowymi i jogurtem 120 g kuskusu 180 ml wrzątku 1 marchew 1 pietruszka 200 g dyni (lub więcej marchwi) 1 łyżka oliwy 150 g jogurtu naturalnego 2% natka, sól kuskus ↔ kasza jaglana, ryż biały">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>115</div>
   <div class="rc-title">
@@ -4520,7 +4556,7 @@ body.searching .rc.open .rc-desc{display:block}
   
  </footer>
 </article>
-<article class="rc" id="p116" data-season="zima" data-diff="1" data-rate="4" data-time="40" data-kcal="260" data-prot="10" data-diet="T" data-veg="1" data-alg="mleko" data-text="budyń jaglany z bananem na parze 60 g kaszy jaglanej 400 ml mleka 2% 1 dojrzały banan szczypta cynamonu i wanilii banan ↔ mus z jabłka, morele">
+<article class="rc" id="p116" data-season="zima" data-diff="1" data-rate="4" data-time="40" data-kcal="260" data-prot="10" data-diet="T" data-veg="1" data-alg="mleko" data-ing="60 g kaszy jaglanej 400 ml mleka 2% 1 dojrzały banan szczypta cynamonu i wanilii" data-text="budyń jaglany z bananem na parze 60 g kaszy jaglanej 400 ml mleka 2% 1 dojrzały banan szczypta cynamonu i wanilii banan ↔ mus z jabłka, morele">
  <header class="rc-head">
   <div class="rc-no" title="Zima"><span>Z</span>116</div>
   <div class="rc-title">
@@ -4559,7 +4595,7 @@ body.searching .rc.open .rc-desc{display:block}
 
  <section class="chapter" id="zamienniki">
   <div class="ch-head"><div class="ch-no">09</div><div><h2>Zamienniki – gotuj z tego, co masz</h2>
-   <p>Przepis to wzór, a nie lista zakupów. Warzywa z tej samej grupy zachowują się na parze podobnie; różnią się głównie czasem. Zamieniasz składnik, korygujesz minuty, reszta zostaje. Wpisz składnik w wyszukiwarkę na górze, a zobaczysz wszystkie przepisy, w których występuje, także jako zamiennik.</p></div></div>
+   <p>Przepis to wzór, a nie lista zakupów. Warzywa z tej samej grupy zachowują się na parze podobnie; różnią się głównie czasem. Zamieniasz składnik, korygujesz minuty, reszta zostaje. Wpisz składnik w wyszukiwarkę na górze, a zobaczysz wszystkie przepisy, w których występuje, także jako zamiennik. Chcesz od razu zobaczyć, co ugotujesz? W filtrach, w grupie „Mam”, zaznacz lub wpisz kilka składników: przepisy ułożą się od najlepiej dopasowanych, a „wszystkie naraz” zostawi tylko te z kompletem.</p></div></div>
   <div class="ch-body">
    <h3 style="font-size:22px;margin-bottom:10px">Masz w lodówce…</h3>
    <ul class="fridge"><li><b>szparagi</b><span>→</span><p>fasolka szparagowa (+5 min), brokuł w różyczkach</p></li><li><b>cukinia</b><span>→</span><p>patison (+2 min), bakłażan (+5 min), papryka (+2 min)</p></li><li><b>kalafior</b><span>→</span><p>brokuł (−3 min), romanesco, kalarepa w kostce (+2 min)</p></li><li><b>ziemniaki</b><span>→</span><p>batat (−5 min), dynia, kasza w misce</p></li><li><b>dynia</b><span>→</span><p>batat, marchew (+2 min), ziemniak (+5 min)</p></li><li><b>szpinak</b><span>→</span><p>liście botwiny, jarmuż (+3 min), pokrzywa</p></li><li><b>dorsz</b><span>→</span><p>mintaj (−2 min), morszczuk, pstrąg, mrożony filet (+5 min)</p></li><li><b>łosoś</b><span>→</span><p>pstrąg (tańszy, −2 min), makrela</p></li><li><b>pierś z kurczaka</b><span>→</span><p>polędwiczka z indyka (+2 min), udka bez kości (+4 min)</p></li><li><b>ryż</b><span>→</span><p>kasza jaglana, gryczana, bulgur – patrz proporcje</p></li><li><b>jogurt grecki</b><span>→</span><p>skyr, twarożek rozmieszany z mlekiem, śmietana 12%</p></li><li><b>świeże zioła</b><span>→</span><p>suszone ⅓ ilości, dodane przed parowaniem, nie po</p></li></ul>
@@ -4580,42 +4616,86 @@ body.searching .rc.open .rc-desc{display:block}
 </main>
 
 <script>
+/* Wyszukiwarka i filtry. Tryb wyników (body.searching): przy aktywnym filtrze lub frazie pokazujemy
+   same pasujące karty od góry, a po wyczyszczeniu wracamy w zapamiętane miejsce (saved) –
+   wcześniej wybór tagu przewijał do rozdziału 1 i nie było widać efektu. */
 (function(){
   const body=document.body, cards=[...document.querySelectorAll('.rc')], seasons=[...document.querySelectorAll('.season')];
   const q=document.getElementById('q'), count=document.getElementById('count'), none=document.getElementById('none'), clr=document.getElementById('clear');
   const dBtns=[...document.querySelectorAll('[data-d]')];
-  const flags={fast:c=>+c.dataset.time<=30, top:c=>c.dataset.rate==='5', lowcal:c=>+c.dataset.kcal<=400, prot:c=>+c.dataset.prot>=25, diet:c=>c.dataset.diet==='T', dietz:c=>c.dataset.diet!=='N', veg:c=>c.dataset.veg==='1'};
+  // Filtry „na tak” czytają data-* z karty. diet = T (bez zmian), dietz = Z (po zmianach); oba naraz działają jak „lub” (T albo Z).
+  const flags={fast:c=>+c.dataset.time<=30, top:c=>c.dataset.rate==='5', lowcal:c=>+c.dataset.kcal<=400, prot:c=>+c.dataset.prot>=25, diet:c=>c.dataset.diet==='T', dietz:c=>c.dataset.diet==='Z', veg:c=>c.dataset.veg==='1'};
   const xBtns=[...document.querySelectorAll('[data-x]')];
   const fBtns=Object.keys(flags).map(id=>document.getElementById(id));
+  // Bez polskich znaków i wielkości liter, żeby „zupa” i „ZUPĄ” oraz „łosoś”/„losos” dawały ten sam wynik. Ł nie rozkłada się w NFD, stąd osobna zamiana.
   const norm=s=>s.toLowerCase().replace(/ł/g,'l').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const texts=cards.map(c=>norm(c.dataset.text));
   const on=b=>b.getAttribute('aria-pressed')==='true';
+  const fg=document.getElementById('fgroups'), ft=document.getElementById('ftoggle'), fbadge=document.getElementById('fbadge');
+  const DIET_IDS=['diet','dietz'];
+  const mBtns=[...document.querySelectorAll('[data-m]')], mamIn=document.getElementById('mam'), mallBtn=document.getElementById('mamall');
+  // „Mam w lodówce”: składniki z chipów i z pola. Dopasowanie po początku słowa i krótkim rdzeniu (marchewka → marche, cukinii → cukin),
+  // bo polskie końcówki zmieniają się w przepisach (cukinia / cukinii / cukinie). Bez diakrytyków, jak w wyszukiwarce.
+  const stem=t=>t.length>=7?t.slice(0,-2):t.length>=5?t.slice(0,-1):t;
+  const ings=cards.map(c=>' '+norm(c.dataset.ing).replace(/[^a-z]+/g,' '));
+  const order=new Map(cards.map((c,i)=>[c,i]));
+  let reordered=false;
+  const mamTokens=()=>{
+    const raw=[...mBtns.filter(on).map(b=>b.dataset.m),...mamIn.value.split(/[\s,;]+/)];
+    return [...new Set(raw.map(w=>norm(w.trim())).filter(w=>w.length>=3))].map(w=>({w,st:stem(w)}));
+  };
   let saved=0, timer=0;
   function apply(){
-    const term=norm(q.value.trim()), ds=dBtns.filter(on).map(b=>b.dataset.d), fs=fBtns.filter(on).map(b=>flags[b.id]), xs=xBtns.filter(on).map(b=>b.dataset.x);
-    const active=!!term||ds.length>0||fs.length>0||xs.length>0;
+    // Filtry wykluczające (xs): karta znika, gdy jej data-alg zawiera wybrany alergen.
+    const term=norm(q.value.trim()), ds=dBtns.filter(on).map(b=>b.dataset.d), xs=xBtns.filter(on).map(b=>b.dataset.x);
+    // Filtry diety to grupa „lub” (T albo Z); pozostałe filtry „na tak” są łączone przez „i”.
+    const pressed=fBtns.filter(on), dietFs=pressed.filter(b=>DIET_IDS.includes(b.id)).map(b=>flags[b.id]), fs=pressed.filter(b=>!DIET_IDS.includes(b.id)).map(b=>flags[b.id]);
+    const mam=mamTokens(), mall=on(mallBtn);
+    const active=!!term||ds.length>0||fs.length>0||dietFs.length>0||xs.length>0||mam.length>0;
     if(active&&!body.classList.contains('searching')){saved=scrollY;body.classList.add('searching');scrollTo(0,0)}
     if(!active&&body.classList.contains('searching')){body.classList.remove('searching');cards.forEach(c=>c.classList.remove('open'));requestAnimationFrame(()=>scrollTo(0,saved))}
     let n=0;
+    const score=new Map();
     cards.forEach((c,i)=>{
-      const ok=(!term||texts[i].includes(term))&&(!ds.length||ds.includes(c.dataset.diff))&&fs.every(f=>f(c))&&xs.every(x=>!c.dataset.alg.split(' ').includes(x));
+      // Dopasowanie składników: ile z wpisanych/wybranych jest w przepisie; „wszystkie naraz” wymaga kompletu, inaczej wystarczy jeden.
+      const hit=mam.filter(t=>ings[i].includes(' '+t.st));
+      score.set(c,hit.length);
+      const mamOk=!mam.length||(mall?hit.length===mam.length:hit.length>0);
+      const ok=mamOk&&(!term||texts[i].includes(term))&&(!ds.length||ds.includes(c.dataset.diff))&&fs.every(f=>f(c))&&(!dietFs.length||dietFs.some(f=>f(c)))&&xs.every(x=>!c.dataset.alg.split(' ').includes(x));
       c.hidden=!ok; if(ok)n++;
+      let m=c.querySelector('.rc-match');
+      if(mam.length&&ok){
+        if(!m){m=document.createElement('p');m.className='rc-match';c.querySelector('.rc-title').appendChild(m)}
+        m.textContent='Masz '+hit.length+' z '+mam.length+': '+hit.map(t=>t.w).join(', ');
+      }else if(m){m.remove()}
     });
+    // Najlepiej dopasowane przepisy na górze działu; po wyczyszczeniu wracamy do kolejności książki.
+    if(mam.length){
+      document.querySelectorAll('.recipes').forEach(box=>[...box.children].sort((a,b)=>(score.get(b)-score.get(a))||(order.get(a)-order.get(b))).forEach(c=>box.appendChild(c)));
+      reordered=true;
+    }else if(reordered){
+      document.querySelectorAll('.recipes').forEach(box=>[...box.children].sort((a,b)=>order.get(a)-order.get(b)).forEach(c=>box.appendChild(c)));
+      reordered=false;
+    }
     seasons.forEach(s=>{
       const vis=s.querySelectorAll('.rc:not([hidden])').length;
       s.hidden=active&&vis===0;
       s.querySelector('.res-label b').textContent=vis;
       s.querySelector('.empty').hidden=vis>0;
     });
+    // Plakietka na przycisku „Filtry” (telefon): ile filtrów włączono, także gdy panel jest zwinięty.
+    const nf=ds.length+fs.length+dietFs.length+xs.length+mam.length+(mall&&mam.length?1:0); fbadge.textContent=nf; fbadge.hidden=nf===0;
     none.hidden=!(active&&n===0); clr.hidden=!active;
     count.textContent=active?'wyniki: '+n:n+' przepisów';
   }
-  function clearAll(){q.value='';[...dBtns,...fBtns,...xBtns].forEach(b=>b.setAttribute('aria-pressed','false'));apply()}
-  [...dBtns,...fBtns,...xBtns].forEach(b=>b.addEventListener('click',()=>{const v=!on(b);b.setAttribute('aria-pressed',String(v));
-    if(v&&(b.id==='diet'||b.id==='dietz'))document.getElementById(b.id==='diet'?'dietz':'diet').setAttribute('aria-pressed','false');apply()}));
+  function clearAll(){q.value='';mamIn.value='';[...dBtns,...fBtns,...xBtns,...mBtns,mallBtn].forEach(b=>b.setAttribute('aria-pressed','false'));apply()}
+  [...dBtns,...fBtns,...xBtns,...mBtns,mallBtn].forEach(b=>b.addEventListener('click',()=>{b.setAttribute('aria-pressed',String(!on(b)));apply()}));
+  mamIn.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(apply,180)});
+  mamIn.addEventListener('keydown',e=>{if(e.key==='Enter'){mamIn.blur()}});
   q.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(apply,180)});
   q.addEventListener('keydown',e=>{if(e.key==='Enter'){q.blur()}});
   clr.addEventListener('click',clearAll);
+  ft.addEventListener('click',()=>{const o=fg.classList.toggle('open');ft.setAttribute('aria-expanded',String(o))});
   document.querySelectorAll('.nav a, .spine a').forEach(a=>a.addEventListener('click',()=>{if(body.classList.contains('searching'))clearAll()}));
   cards.forEach(c=>{const b=c.querySelector('.rc-toggle');b.addEventListener('click',()=>{const o=c.classList.toggle('open');b.setAttribute('aria-expanded',String(o));b.textContent=o?'Zwiń':'Pokaż przepis'})});
 })();
