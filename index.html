@@ -4644,7 +4644,8 @@ body.searching .rc.open .rc-desc{display:block}
     const raw=[...mBtns.filter(on).map(b=>b.dataset.m),...mamIn.value.split(/[\s,;]+/)];
     return [...new Set(raw.map(w=>norm(w.trim())).filter(w=>w.length>=3))].map(w=>({w,st:stem(w)}));
   };
-  let saved=0, timer=0;
+  // quiet: do tego czasu ignorujemy zdarzenia scroll – to nasze własne przewinięcie (wejście i wyjście z trybu wyników), nie ruch użytkownika.
+  let saved=0, timer=0, quiet=0;
   function apply(){
     // Filtry wykluczające (xs): karta znika, gdy jej data-alg zawiera wybrany alergen.
     const term=norm(q.value.trim()), ds=dBtns.filter(on).map(b=>b.dataset.d), xs=xBtns.filter(on).map(b=>b.dataset.x);
@@ -4652,8 +4653,8 @@ body.searching .rc.open .rc-desc{display:block}
     const pressed=fBtns.filter(on), dietFs=pressed.filter(b=>DIET_IDS.includes(b.id)).map(b=>flags[b.id]), fs=pressed.filter(b=>!DIET_IDS.includes(b.id)).map(b=>flags[b.id]);
     const mam=mamTokens(), mall=on(mallBtn);
     const active=!!term||ds.length>0||fs.length>0||dietFs.length>0||xs.length>0||mam.length>0;
-    if(active&&!body.classList.contains('searching')){saved=scrollY;body.classList.add('searching');scrollTo(0,0)}
-    if(!active&&body.classList.contains('searching')){body.classList.remove('searching');cards.forEach(c=>c.classList.remove('open'));requestAnimationFrame(()=>scrollTo(0,saved))}
+    if(active&&!body.classList.contains('searching')){saved=scrollY;body.classList.add('searching');scrollTo(0,0);quiet=Date.now()+700}
+    if(!active&&body.classList.contains('searching')){body.classList.remove('searching');cards.forEach(c=>c.classList.remove('open'));quiet=Date.now()+700;requestAnimationFrame(()=>scrollTo(0,saved))}
     let n=0;
     const score=new Map();
     cards.forEach((c,i)=>{
@@ -4695,6 +4696,12 @@ body.searching .rc.open .rc-desc{display:block}
   q.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(apply,180)});
   q.addEventListener('keydown',e=>{if(e.key==='Enter'){q.blur()}});
   clr.addEventListener('click',clearAll);
+  // Panel filtrów (telefon) zamyka się sam, gdy użytkownik przewija stronę albo dotyka poza paskiem – zasłaniałby listę wyników.
+  // Wyjątek: gdy pole tekstowe ma fokus, bo klawiatura ekranowa potrafi przewinąć stronę i zamknęłaby panel w trakcie pisania.
+  const closePanel=()=>{fg.classList.remove('open');ft.setAttribute('aria-expanded','false')};
+  addEventListener('scroll',()=>{if(Date.now()>quiet&&fg.classList.contains('open')&&document.activeElement.tagName!=='INPUT')closePanel()},{passive:true});
+  document.addEventListener('pointerdown',e=>{if(!e.target.closest('.bar'))closePanel()});
+  [q,mamIn].forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter')closePanel()}));
   ft.addEventListener('click',()=>{const o=fg.classList.toggle('open');ft.setAttribute('aria-expanded',String(o))});
   document.querySelectorAll('.nav a, .spine a').forEach(a=>a.addEventListener('click',()=>{if(body.classList.contains('searching'))clearAll()}));
   cards.forEach(c=>{const b=c.querySelector('.rc-toggle');b.addEventListener('click',()=>{const o=c.classList.toggle('open');b.setAttribute('aria-expanded',String(o));b.textContent=o?'Zwiń':'Pokaż przepis'})});
